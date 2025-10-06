@@ -1,5 +1,5 @@
 // Put this component in the same file below App or in a new TeamColumn.tsx and import it.
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 
 function slugifySpecies(species: string) {
   if (!species) return '';
@@ -59,6 +59,112 @@ type TeamColumnProps = {
 export function TeamColumn({ title, team, onAdd, onUpdate, onRemove, canAdd }: TeamColumnProps) {
   const [expandedIdx, setExpandedIdx] = useState<number | null>(null);
 
+  // Small reusable inline editable component.
+  function InlineEditable({
+    value,
+    onCommit,
+    className,
+    multiline,
+  }: {
+    value: string | undefined | null;
+    onCommit: (v: string) => void;
+    className?: string;
+    multiline?: boolean;
+  }) {
+    const [editing, setEditing] = useState(false);
+    const [draft, setDraft] = useState((value ?? '').toString());
+    const inputRef = useRef<HTMLInputElement | HTMLTextAreaElement | null>(null);
+
+    useEffect(() => {
+      setDraft((value ?? '').toString());
+    }, [value]);
+
+    useEffect(() => {
+      if (editing && inputRef.current) {
+        inputRef.current.focus();
+        // move cursor to end
+        const el = inputRef.current as HTMLInputElement | HTMLTextAreaElement;
+        const len = el.value.length;
+        el.setSelectionRange && el.setSelectionRange(len, len);
+      }
+    }, [editing]);
+
+    function start(e?: React.MouseEvent) {
+      e?.stopPropagation();
+      setEditing(true);
+    }
+
+    function save() {
+      const newVal = draft.trim();
+      setEditing(false);
+      if ((value ?? '') !== newVal) onCommit(newVal);
+    }
+
+    function cancel() {
+      setDraft((value ?? '').toString());
+      setEditing(false);
+    }
+
+    if (editing) {
+      if (multiline) {
+        return (
+          <textarea
+              ref={el => { inputRef.current = el; }}
+            className={`rounded border px-1 py-0.5 text-sm ${className ?? ''}`}
+            value={draft}
+            onChange={e => setDraft(e.target.value)}
+            onBlur={() => save()}
+            onKeyDown={e => {
+              if (e.key === 'Escape') {
+                e.stopPropagation();
+                cancel();
+              }
+            }}
+          />
+        );
+      }
+
+      return (
+        <input
+          ref={el => { inputRef.current = el; }}
+          className={`rounded border px-1 py-0.5 text-sm ${className ?? ''}`}
+          value={draft}
+          onChange={e => setDraft(e.target.value)}
+          onBlur={() => save()}
+          onKeyDown={e => {
+            if (e.key === 'Enter') {
+              e.preventDefault();
+              e.stopPropagation();
+              save();
+            } else if (e.key === 'Escape') {
+              e.stopPropagation();
+              cancel();
+            }
+          }}
+        />
+      );
+    }
+
+    return (
+      <span
+        onClick={start}
+        onDoubleClick={start}
+        className={`cursor-text ${className ?? ''}`}
+        role="button"
+        tabIndex={0}
+        onKeyDown={(e: React.KeyboardEvent) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            start();
+          }
+        }}
+      >
+        {(value ?? '') || <span className="text-black-400">(Nickname)</span>}
+        <span className="ml-1 text-black-400">✎</span>
+      </span>
+    );
+  }
+
   function toggleExpanded(idx: number) {
     setExpandedIdx(prev => (prev === idx ? null : idx));
   }
@@ -75,7 +181,7 @@ export function TeamColumn({ title, team, onAdd, onUpdate, onRemove, canAdd }: T
           return (
             <div key={slotIdx} className="space-y-1">
               <div
-                className={`p-2 border rounded flex items-center justify-between ${pokemon ? 'cursor-pointer' : ''}`}
+                className={`p-2 border rounded flex items-center bg-white justify-between ${pokemon ? 'cursor-pointer' : ''}`}
                 {...(pokemon
                   ? {
                       role: 'button',
@@ -105,38 +211,37 @@ export function TeamColumn({ title, team, onAdd, onUpdate, onRemove, canAdd }: T
                       />
                     </a>
                     <div className="flex flex-col">
-                      <div className="font-medium">{pokemon.name || pokemon.species}</div>
-                      <div className="text-sm text-gray-400">{pokemon.item || ''}</div>
+                      <div className="font-medium">
+                        <InlineEditable
+                          value={pokemon.name ?? pokemon.species}
+                          onCommit={(v) => onUpdate(slotIdx, { name: v || null })}
+                          className="font-medium"
+                        />
+                      </div>
+                      <div className="text-sm text-black-400">
+                        <InlineEditable
+                          value={pokemon.item ?? ''}
+                          onCommit={(v) => onUpdate(slotIdx, { item: v || null })}
+                          className="text-sm"
+                        />
+                      </div>
                     </div>
                   </div>
                 ) : (
-                  <div className="text-gray-400">Empty slot</div>
+                  <div className="text-black-400">Empty slot</div>
                 )}
 
                 <div className="flex gap-2">
                   {pokemon ? (
                     <>
                       <button
-                        className="px-2 py-1 bg-yellow-400 rounded text-xs"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          // quick inline edit example (replace with modal/form)
-                          const newName = prompt('Edit nickname:', pokemon.name ?? pokemon.species);
-                          if (newName !== null) {
-                            onUpdate(slotIdx, { name: newName });
-                          }
-                        }}
-                      >
-                        Edit
-                      </button>
-                      <button
-                        className="px-2 py-1 bg-red-500 text-white rounded text-xs"
+                        className="px-2 py-1 text-black rounded text-xs"
                         onClick={(e) => {
                           e.stopPropagation();
                           if (confirm('Remove this Pokémon?')) onRemove(slotIdx);
                         }}
                       >
-                        Remove
+                        x
                       </button>
                     </>
                   ) : (
@@ -162,10 +267,20 @@ export function TeamColumn({ title, team, onAdd, onUpdate, onRemove, canAdd }: T
               </div>
 
               {isExpanded && pokemon && (
-                <div className="p-2 border-l border-r border-b rounded-b bg-black/5 text-sm">
-                  <div className="font-semibold">{pokemon.species}</div>
-                  {pokemon.ability && <div>Ability: {pokemon.ability}</div>}
-                  {pokemon.nature && <div>Nature: {pokemon.nature}</div>}
+                <div className="p-2 border-l border-r border-b bg-white rounded-b bg-black/5 text-sm">
+                  <div className="font-semibold">
+                    <InlineEditable
+                      value={pokemon.species}
+                      onCommit={(v) => onUpdate(slotIdx, { species: v || pokemon.species })}
+                      className="font-semibold"
+                    />
+                  </div>
+                  <div>
+                    Ability: <InlineEditable value={pokemon.ability ?? ''} onCommit={(v) => onUpdate(slotIdx, { ability: v || null })} />
+                  </div>
+                  <div>
+                    Nature: <InlineEditable value={pokemon.nature ?? ''} onCommit={(v) => onUpdate(slotIdx, { nature: v || undefined })} />
+                  </div>
                   {pokemon.evs && (
                     <div>EVs: {Object.entries(pokemon.evs).map(([s, v]) => `${s.toUpperCase()}: ${v}`).join(', ')}</div>
                   )}
@@ -173,7 +288,41 @@ export function TeamColumn({ title, team, onAdd, onUpdate, onRemove, canAdd }: T
                     <div>IVs: {Object.entries(pokemon.ivs).map(([s, v]) => `${s.toUpperCase()}: ${v}`).join(', ')}</div>
                   )}
                   {pokemon.moves && pokemon.moves.length > 0 && (
-                    <div>Moves: {pokemon.moves.join(', ')}</div>
+                    <div className="flex flex-col gap-1 items-center">
+                      <div className="font-medium">Moves:</div>
+                      {pokemon.moves.map((m, mi) => (
+                        <div key={mi} className="flex p-2 items-center rounded-xl gap-2 outline-2 outline-black">
+                          <InlineEditable
+                            value={m}
+                            onCommit={(v) => {
+                              const newMoves = [...pokemon.moves];
+                              newMoves[mi] = v;
+                              onUpdate(slotIdx, { moves: newMoves });
+                            }}
+                          />
+                          <button
+                            className="px-2 py-0.5 text-xs text-red-600"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              const newMoves = pokemon.moves.filter((_, i) => i !== mi);
+                              onUpdate(slotIdx, { moves: newMoves });
+                            }}
+                          >
+                            remove
+                          </button>
+                        </div>
+                      ))}
+                      <button
+                        className="mt-1 px-2 py-1 bg-green-500 text-white rounded text-xs"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          const newMove = prompt('New move name:');
+                          if (newMove) onUpdate(slotIdx, { moves: [...pokemon.moves, newMove] });
+                        }}
+                      >
+                        Add move
+                      </button>
+                    </div>
                   )}
                 </div>
               )}
