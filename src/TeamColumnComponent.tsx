@@ -1,5 +1,5 @@
 // Put this component in the same file below App or in a new TeamColumn.tsx and import it.
-import { useState, useRef, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 
 function slugifySpecies(species: string) {
   if (!species) return '';
@@ -58,278 +58,98 @@ type TeamColumnProps = {
 
 export function TeamColumn({ title, team, onAdd, onUpdate, onRemove, canAdd }: TeamColumnProps) {
   const [expandedIdx, setExpandedIdx] = useState<number | null>(null);
+  const [focusedSlot, setFocusedSlot] = useState<number | 'new' | null>(null);
 
-  // Small reusable inline editable component.
-  function InlineEditable({
-    value,
-    onCommit,
-    className,
-    multiline,
+  // Focused editor used for Add or Edit flows - hides the rest of the list while open
+  function FocusedEditor({
+    initial,
+    onSave,
+    onCancel,
+    onRemove,
   }: {
-    value: string | undefined | null;
-    onCommit: (v: string) => void;
-    className?: string;
-    multiline?: boolean;
+    initial: Pokemon;
+    onSave: (p: Pokemon) => void;
+    onCancel: () => void;
+    onRemove?: () => void;
   }) {
-    const [editing, setEditing] = useState(false);
-    const [draft, setDraft] = useState((value ?? '').toString());
-    const inputRef = useRef<HTMLInputElement | HTMLTextAreaElement | null>(null);
+    const [draft, setDraft] = useState<Pokemon>(initial);
 
-    useEffect(() => {
-      setDraft((value ?? '').toString());
-    }, [value]);
-
-    useEffect(() => {
-      if (editing && inputRef.current) {
-        inputRef.current.focus();
-        // move cursor to end
-        const el = inputRef.current as HTMLInputElement | HTMLTextAreaElement;
-        const len = el.value.length;
-        el.setSelectionRange && el.setSelectionRange(len, len);
-      }
-    }, [editing]);
-
-    function start(e?: React.MouseEvent) {
-      e?.stopPropagation();
-      setEditing(true);
-    }
-
-    function save() {
-      const newVal = draft.trim();
-      setEditing(false);
-      if ((value ?? '') !== newVal) onCommit(newVal);
-    }
-
-    function cancel() {
-      setDraft((value ?? '').toString());
-      setEditing(false);
-    }
-
-    if (editing) {
-      if (multiline) {
-        return (
-          <textarea
-              ref={el => { inputRef.current = el; }}
-            className={`rounded border px-1 py-0.5 text-sm ${className ?? ''}`}
-            value={draft}
-            onChange={e => setDraft(e.target.value)}
-            onBlur={() => save()}
-            onKeyDown={e => {
-              if (e.key === 'Escape') {
-                e.stopPropagation();
-                cancel();
-              }
-            }}
-          />
-        );
-      }
-
-      return (
-        <input
-          ref={el => { inputRef.current = el; }}
-          className={`rounded border px-1 py-0.5 text-sm ${className ?? ''}`}
-          value={draft}
-          onChange={e => setDraft(e.target.value)}
-          onBlur={() => save()}
-          onKeyDown={e => {
-            if (e.key === 'Enter') {
-              e.preventDefault();
-              e.stopPropagation();
-              save();
-            } else if (e.key === 'Escape') {
-              e.stopPropagation();
-              cancel();
-            }
-          }}
-        />
-      );
-    }
+    useEffect(() => setDraft(initial), [initial]);
 
     return (
-      <span
-        onClick={start}
-        onDoubleClick={start}
-        className={`cursor-text ${className ?? ''}`}
-        role="button"
-        tabIndex={0}
-        onKeyDown={(e: React.KeyboardEvent) => {
-          if (e.key === 'Enter' || e.key === ' ') {
-            e.preventDefault();
-            start();
-          }
-        }}
-      >
-        {(value ?? '') || <span className="text-black-400">(Nickname)</span>}
-        <span className="ml-1 text-black-400">✎</span>
-      </span>
-    );
+      <span>Hi there</span>)
   }
 
   function toggleExpanded(idx: number) {
     setExpandedIdx(prev => (prev === idx ? null : idx));
   }
 
+  // focus control handled inline via setFocusedSlot
+
   // Render fixed 6 slots (0..5). If team has fewer than 6, show "Empty slot" UI.
   return (
-    <div className="bg-white/10 p-4 rounded-lg">
-      <h2 className="mb-2 font-semibold">{title}</h2>
-      <div className="space-y-3">
-        {Array.from({ length: 6 }).map((_, slotIdx) => {
-          const pokemon = team[slotIdx];
-          const isExpanded = expandedIdx === slotIdx;
+    <div className = "flex flex-col gap-4 block">
+      {title}
+      <ul className = "list-none block">
+      {team.map((poke, idx) => (
+        <li value = {idx} className = "list-none relative">
+        <div className = "absolute top-0 left-0 border rounded-md">
+          <label className = "text-sm text-white/50">Nickname</label>
+        </div>
+        <div className = "border rounded-md p-2 h-auto grid grid-cols-4">
 
-          return (
-            <div key={slotIdx} className="space-y-1">
-              <div
-                className={`p-2 border rounded flex items-center bg-white justify-between ${pokemon ? 'cursor-pointer' : ''}`}
-                {...(pokemon
-                  ? {
-                      role: 'button',
-                      tabIndex: 0,
-                      onClick: () => toggleExpanded(slotIdx),
-                      onKeyDown: (e: React.KeyboardEvent) => {
-                        if (e.key === 'Enter' || e.key === ' ') {
-                          e.preventDefault();
-                          toggleExpanded(slotIdx);
-                        }
-                      },
-                    }
-                  : {})}
-              >
-                {pokemon ? (
-                  <div className="flex items-center gap-3">
-                    <a href={getPokedexUrl(pokemon.species)} target="_blank" rel="noopener noreferrer">
-                      <img
-                        className="h-10 w-10 rounded"
-                        src={getSpriteUrl(pokemon.species)}
-                        alt={pokemon.species}
-                        onError={(e) => {
-                          const img = e.currentTarget as HTMLImageElement;
-                          img.onerror = null;
-                          img.src = 'https://via.placeholder.com/96?text=?';
-                        }}
-                      />
-                    </a>
-                    <div className="flex flex-col">
-                      <div className="font-medium">
-                        <InlineEditable
-                          value={pokemon.name ?? pokemon.species}
-                          onCommit={(v) => onUpdate(slotIdx, { name: v || null })}
-                          className="font-medium"
-                        />
-                      </div>
-                      <div className="text-sm text-black-400">
-                        <InlineEditable
-                          value={pokemon.item ?? ''}
-                          onCommit={(v) => onUpdate(slotIdx, { item: v || null })}
-                          className="text-sm"
-                        />
-                      </div>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="text-black-400">Empty slot</div>
-                )}
+          <div className = "grid place-items-center gap-2 p-2 border border-black/20 rounded-lg bg-white/10 hover:bg-white/20 cursor-pointer row-span-2">
+            <img src={getSpriteUrl(poke.species)} alt={poke.species} className = "w-16 h-16"/>
+            <div className = "flex flex-col">
+              <a href={getPokedexUrl(poke.species)} target="_blank" rel="noopener noreferrer" className = "font-bold hover:underline ">{poke.species}</a>
+              <div className = "text-sm text-white/50">{poke.ability}</div>
+            </div>
+          </div>
 
-                <div className="flex gap-2">
-                  {pokemon ? (
-                    <>
-                      <button
-                        className="px-2 py-1 text-black rounded text-xs"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          if (confirm('Remove this Pokémon?')) onRemove(slotIdx);
-                        }}
-                      >
-                        x
-                      </button>
-                    </>
-                  ) : (
-                    <button
-                      className="px-2 py-1 bg-green-500 text-white rounded text-xs"
-                      onClick={() => {
-                        if (!canAdd) {
-                          alert('Team is full (6). Remove a Pokémon first.');
-                          return;
-                        }
-                        // very small example: ask species only
-                        const species = prompt('Species to add (e.g. Pikachu):');
-                        if (species) {
-                          const success = onAdd({ species, name: '', moves: [], evs: {}, ivs: {} });
-                          if (!success) alert('Could not add Pokémon (team may be full).');
-                        }
-                      }}
-                    >
-                      Add
-                    </button>
-                  )}
+          <div className = "grid gap-2 place-items-center p-2 border border-black/20 rounded-lg bg-white/10 hover:bg-white/20 cursor-pointer grid-rows-2">
+            <div className = "gap-2">
+              <label>Details</label>
+              <button className = "block box-border border rounded-sm p-1 m-2">
+                <span className = "p-2 block float-left text-sm text-center">
+                  <label>Gender</label>
+                  {poke.gender || '-'}
+                </span>
+              </button>
+            </div>
+            <div className = "grid gap-2 grid-cols-2">
+              <div className = "">
+                <label>Item</label>
+                <div>
+                  <input type="text" value={poke.item || ''} className = "bg-transparent border-b border-white/20 w-full"/>
                 </div>
               </div>
-
-              {isExpanded && pokemon && (
-                <div className="p-2 border-l border-r border-b bg-white rounded-b bg-black/5 text-sm">
-                  <div className="font-semibold">
-                    <InlineEditable
-                      value={pokemon.species}
-                      onCommit={(v) => onUpdate(slotIdx, { species: v || pokemon.species })}
-                      className="font-semibold"
-                    />
-                  </div>
-                  <div>
-                    Ability: <InlineEditable value={pokemon.ability ?? ''} onCommit={(v) => onUpdate(slotIdx, { ability: v || null })} />
-                  </div>
-                  <div>
-                    Nature: <InlineEditable value={pokemon.nature ?? ''} onCommit={(v) => onUpdate(slotIdx, { nature: v || undefined })} />
-                  </div>
-                  {pokemon.evs && (
-                    <div>EVs: {Object.entries(pokemon.evs).map(([s, v]) => `${s.toUpperCase()}: ${v}`).join(', ')}</div>
-                  )}
-                  {pokemon.ivs && (
-                    <div>IVs: {Object.entries(pokemon.ivs).map(([s, v]) => `${s.toUpperCase()}: ${v}`).join(', ')}</div>
-                  )}
-                  {pokemon.moves && pokemon.moves.length > 0 && (
-                    <div className="flex flex-col gap-1 items-center">
-                      <div className="font-medium">Moves:</div>
-                      {pokemon.moves.map((m, mi) => (
-                        <div key={mi} className="flex p-2 items-center rounded-xl gap-2 outline-2 outline-black">
-                          <InlineEditable
-                            value={m}
-                            onCommit={(v) => {
-                              const newMoves = [...pokemon.moves];
-                              newMoves[mi] = v;
-                              onUpdate(slotIdx, { moves: newMoves });
-                            }}
-                          />
-                          <button
-                            className="px-2 py-0.5 text-xs text-red-600"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              const newMoves = pokemon.moves.filter((_, i) => i !== mi);
-                              onUpdate(slotIdx, { moves: newMoves });
-                            }}
-                          >
-                            remove
-                          </button>
-                        </div>
-                      ))}
-                      <button
-                        className="mt-1 px-2 py-1 bg-green-500 text-white rounded text-xs"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          const newMove = prompt('New move name:');
-                          if (newMove) onUpdate(slotIdx, { moves: [...pokemon.moves, newMove] });
-                        }}
-                      >
-                        Add move
-                      </button>
-                    </div>
-                  )}
-                </div>
-              )}
+              <div className = "">
+                <label>Ability</label>
+                <div>{poke.ability || ''}</div>
+              </div>
             </div>
-          );
-        })}
-      </div>
+          </div>
+
+          <div className = "grid grid-rows-4 gap-2 p-2 border border-black/20 rounded-lg bg-white/10 hover:bg-white/20 cursor-pointer">
+            <label>Moves</label>
+            {poke.moves.map((move, i) => (
+              <div className = "text-sm" key={i}>
+                {move}
+              </div>
+            ))}
+          </div>
+
+          <div className = "grid grid-rows-2 gap-2 p-2 border border-black/20 rounded-lg bg-white/10 hover:bg-white/20 cursor-pointer">
+            <label>Stats</label>
+          </div>
+
+        </div>
+        </li>
+      ))}
+      </ul>
+      {team.length < 6 && canAdd && (
+        <button>Add Pokemon</button>
+      )}
     </div>
   );
 }
