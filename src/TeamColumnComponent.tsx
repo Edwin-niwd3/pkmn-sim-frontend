@@ -88,62 +88,68 @@ export function TeamColumn({ title, team, onAdd, onUpdate, onRemove, canAdd }: T
 
   // Render fixed 6 slots (0..5). If team has fewer than 6, show "Empty slot" UI.
   return (
-    <div className = "flex flex-col gap-4 block">
+    <div className = "max-w-md bg-slate-100 border border-grey-300 rounded-xl shadow-md overflow-hidden p-4">
       {title}
       <ul className = "list-none block">
       {team.map((poke, idx) => (
         <li value = {idx} className = "list-none relative">
-        <div className = "absolute top-0 left-0 border rounded-md">
-          <label className = "text-sm text-white/50">Nickname</label>
-        </div>
-        <div className = "border rounded-md p-2 h-auto grid grid-cols-4">
-
-          <div className = "grid place-items-center gap-2 p-2 border border-black/20 rounded-lg bg-white/10 hover:bg-white/20 cursor-pointer row-span-2">
-            <img src={getSpriteUrl(poke.species)} alt={poke.species} className = "w-16 h-16"/>
-            <div className = "flex flex-col">
-              <a href={getPokedexUrl(poke.species)} target="_blank" rel="noopener noreferrer" className = "font-bold hover:underline ">{poke.species}</a>
-              <div className = "text-sm text-white/50">{poke.ability}</div>
-            </div>
+          <div className = "flex justify-between items-start mb-2">
+            <input type="text" placeholder = "Nickname" value = {poke.name || ''} className = "font-semibold text-lg bg-transparent border-b border-grey-300 focus:outline-none w-1/2"/>
           </div>
-
-          <div className = "grid gap-2 place-items-center p-2 border border-black/20 rounded-lg bg-white/10 hover:bg-white/20 cursor-pointer grid-rows-2">
-            <div className = "gap-2">
-              <label>Details</label>
-              <button className = "block box-border border rounded-sm p-1 m-2">
-                <span className = "p-2 block float-left text-sm text-center">
-                  <label>Gender</label>
-                  {poke.gender || '-'}
-                </span>
-              </button>
-            </div>
-            <div className = "grid gap-2 grid-cols-2">
-              <div className = "">
-                <label>Item</label>
-                <div>
-                  <input type="text" value={poke.item || ''} className = "bg-transparent border-b border-white/20 w-full"/>
+          {/* Pokemon Sprite and info */}
+          <div className = "flex items-center gap-4">
+            <img src={getSpriteUrl(poke.species)}
+            alt = {poke.species} className = 'w-16 h-16'/>
+            <div className = "flex-1 grid grid-cols-2 gap-2 text-sm">
+              <div>
+                <p><span className = "font-semibold">Level:</span></p>
+                <p><span className = "font-semibold">Gender:</span></p>
+                <p><span className = "font-semibold">Shiny:</span></p>
+              </div>
+              <div>
+                <p><span className = "font-semibold">Tera Type:</span></p>
+                <div className = 'flex gap-1 mt-1'>
+                  <span className="px-2 py-0.5 bg-pink-400 text-white text-xs rounded">Type 1</span>
+                  <span className="px-2 py-0.5 bg-blue-400 text-white text-xs rounded">Type 2</span>
                 </div>
               </div>
-              <div className = "">
-                <label>Ability</label>
-                <div>{poke.ability || ''}</div>
+            </div>
+          </div>
+          {/* Abilities and items and moves */}
+          <div className="mt-3 grid-cols-2 gap-4 text-sm">
+            <div>
+              <p><span className="font-semibold">Pokemon: </span>{poke.species}</p>
+              <p><span className="font-semibold">Item: </span>{poke.item}</p>
+              <p><span className="font-semibold">Ability: </span>{poke.ability}</p>
+            </div>
+            <div>
+              <p className="font-semibold mb-1">Moves</p>
+              <ul className="list-disc ml-4 space-y-1">
+                {poke.moves.map((move, moveIdx) => (
+                  <li key={moveIdx}>{move}</li>
+                ))}
+              </ul>
+            </div>
+          </div>
+          {/*Stats*/}
+          <div className="mt-3">
+            <p className="font-semibold mb-1 text-sm">Stats</p>
+            <div className="space-y-1 text-sm">
+            {Object.entries(poke.evs ?? {}).map(([stat, ev]) => (
+              <div key={stat} className="flex justify-between">
+                <span>{stat.toUpperCase()}</span>
+                <div className="bg-gray-200 w-48 h-2 rounded overflow-hidden">
+                  <div
+                  className="bg-green-400 h-full"
+                  style={{ width: `${(ev / 252) * 100}%` }}
+                  ></div>
+                </div>
+              <span>{ev}</span>
               </div>
+            ))}
             </div>
           </div>
 
-          <div className = "grid grid-rows-4 gap-2 p-2 border border-black/20 rounded-lg bg-white/10 hover:bg-white/20 cursor-pointer">
-            <label>Moves</label>
-            {poke.moves.map((move, i) => (
-              <div className = "text-sm" key={i}>
-                {move}
-              </div>
-            ))}
-          </div>
-
-          <div className = "grid grid-rows-2 gap-2 p-2 border border-black/20 rounded-lg bg-white/10 hover:bg-white/20 cursor-pointer">
-            <label>Stats</label>
-          </div>
-
-        </div>
         </li>
       ))}
       </ul>
