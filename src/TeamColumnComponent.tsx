@@ -1,39 +1,7 @@
 // Put this component in the same file below App or in a new TeamColumn.tsx and import it.
 import { useState, useEffect } from 'react';
+import { getSpriteUrl } from '../utils/Sprites';
 
-function slugifySpecies(species: string) {
-  if (!species) return '';
-  const map: Record<string, string> = {
-    "Nidoran♀": "nidoran-f",
-    "Nidoran♂": "nidoran-m",
-    "Farfetch'd": "farfetchd",
-    "Mr. Mime": "mr-mime",
-    "Mime Jr.": "mime-jr",
-    "Type: Null": "type-null",
-    "Flabébé": "flabebe",
-    "Ho-Oh": "ho-oh",
-  };
-  if (map[species]) return map[species];
-  return species
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .replace(/[’'`.]/g, '')
-    .replace(/[:]/g, '-')
-    .replace(/[^a-zA-Z0-9\s-]/g, '')
-    .trim()
-    .toLowerCase()
-    .replace(/\s+/g, '-');
-}
-
-function getPokedexUrl(species: string) {
-  const slug = slugifySpecies(species);
-  return `https://pokemondb.net/pokedex/${slug}`;
-}
-
-function getSpriteUrl(species: string) {
-  const slug = slugifySpecies(species);
-  return `https://img.pokemondb.net/sprites/home/normal/${slug}.png`;
-}
 
   type Pokemon = {
     name?: string | null;
@@ -60,6 +28,7 @@ export function TeamColumn({ title, team, onAdd, onUpdate, onRemove, canAdd }: T
   
   const [focusedPokemonIndex, setFocusedPokemonIndex] = useState<number | null>(null);
   const [focusedPokemon, setFocusedPokemon] = useState<Pokemon | null> (null);
+  const [Evs, setEvs] = useState<Record<string, number> | undefined>(focusedPokemon?.evs || {hp:0, atk:0, def:0, spa:0, spd:0, spe:0});
 
   // focus control handled inline via setFocusedSlot
 
@@ -72,7 +41,8 @@ export function TeamColumn({ title, team, onAdd, onUpdate, onRemove, canAdd }: T
       {team.map((poke, idx) => (
         <li value = {idx} className = "list-none relative" onClick = {() => {
         setFocusedPokemon(poke); 
-        setFocusedPokemonIndex(idx)
+        setFocusedPokemonIndex(idx);
+        setEvs(poke.evs)
         }}>
 
           <div className = "flex justify-between items-start mb-2">
@@ -118,15 +88,22 @@ export function TeamColumn({ title, team, onAdd, onUpdate, onRemove, canAdd }: T
             <p className="font-semibold mb-1 text-sm">Stats</p>
             <div className="space-y-1 text-sm">
             {Object.entries(poke.evs ?? {}).map(([stat, ev]) => (
-              <div key={stat} className="flex justify-between">
-                <span>{stat.toUpperCase()}</span>
-                <div className="bg-gray-200 w-48 h-2 rounded overflow-hidden">
-                  <div
-                  className="bg-green-400 h-full"
-                  style={{ width: `${(ev / 252) * 100}%` }}
-                  ></div>
+              <div key={stat} className="flex items-center justify-between gap-3">
+                <span className="w-12">{stat.toUpperCase()}</span>
+                <div className="flex-1">
+                  {/* Visual slider that looks like the previous bar. Disabled in list view. */}
+                  <input
+                    type="range"
+                    min={0}
+                    max={252}
+                    value={ev}
+                    disabled
+                    className="w-full h-2 bg-gray-200 appearance-none rounded overflow-hidden range-no-focus"
+                    onChange={() => { /* noop in list view */ }}
+                    style={{ background: `linear-gradient(to right, #34d399 ${(ev / 252) * 100}%, #e5e7eb ${(ev / 252) * 100}%)` }}
+                  />
                 </div>
-              <span>{ev}</span>
+                <span className="w-8 text-right">{ev}</span>
               </div>
             ))}
             </div>
@@ -180,15 +157,52 @@ export function TeamColumn({ title, team, onAdd, onUpdate, onRemove, canAdd }: T
             <p className="font-semibold mb-1 text-sm">Stats</p>
             <div className="space-y-1 text-sm">
             {Object.entries(focusedPokemon.evs ?? {}).map(([stat, ev]) => (
-              <div key={stat} className="flex justify-between">
-                <span>{stat.toUpperCase()}</span>
-                <div className="bg-gray-200 w-48 h-2 rounded overflow-hidden">
-                  <div
-                  className="bg-green-400 h-full"
-                  style={{ width: `${(ev / 252) * 100}%` }}
-                  ></div>
+              <div key={stat} className="mb-4">
+                <div className="flex justify-between mb-1">
+                  <span>{stat.toUpperCase()}</span>
+                  <span>{ev}</span>
                 </div>
-              <span>{ev}</span>
+
+                {/* Progress bar */}
+                <div className="bg-gray-200 w-48 h-2 rounded overflow-hidden mb-2">
+                  <div
+                    className="bg-green-400 h-full transition-all duration-300"
+                    style={{ width: `${(ev / 252) * 100}%` }}
+                  />
+                </div>
+
+                {/* Slider input */}
+                <input
+                  type="range"
+                  min={0}
+                  max={252}
+                  step={4}
+                  value={ev}
+                  onChange={(e) => {
+                  const newVal = Number(e.target.value);
+
+                  setFocusedPokemon((prev): Pokemon | null => {
+                    if (!prev) return prev;
+
+                    const currentEvs = prev.evs ?? {};
+                    const currentTotal = Object.values(currentEvs).reduce((a, b) => a + b, 0);
+                    const oldVal = currentEvs[stat] ?? 0;
+                    const totalAfterChange = currentTotal - oldVal + newVal;
+                    
+                    if (totalAfterChange > 510) return prev;
+
+                    return {
+                      ...prev,
+                      evs: {
+                        ...currentEvs,
+                        [stat]: newVal,
+                      },
+                    };
+                  });
+                }}
+
+                  className="w-48 accent-green-500"
+                />
               </div>
             ))}
             </div>
@@ -196,6 +210,7 @@ export function TeamColumn({ title, team, onAdd, onUpdate, onRemove, canAdd }: T
           <button onClick = {() => {
             setFocusedPokemon(null);
             setFocusedPokemonIndex(null);
+            setEvs(undefined);
           }}>Back to Team View</button>
         </>
       )}
