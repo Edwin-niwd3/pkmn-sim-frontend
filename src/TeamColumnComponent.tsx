@@ -28,7 +28,6 @@ export function TeamColumn({ title, team, onAdd, onUpdate, onRemove, canAdd }: T
   
   const [focusedPokemonIndex, setFocusedPokemonIndex] = useState<number | null>(null);
   const [focusedPokemon, setFocusedPokemon] = useState<Pokemon | null> (null);
-  const [Evs, setEvs] = useState<Record<string, number> | undefined>(focusedPokemon?.evs || {hp:0, atk:0, def:0, spa:0, spd:0, spe:0});
 
   // focus control handled inline via setFocusedSlot
 
@@ -42,7 +41,6 @@ export function TeamColumn({ title, team, onAdd, onUpdate, onRemove, canAdd }: T
         <li value = {idx} className = "list-none relative" onClick = {() => {
         setFocusedPokemon(poke); 
         setFocusedPokemonIndex(idx);
-        setEvs(poke.evs)
         }}>
 
           <div className = "flex justify-between items-start mb-2">
@@ -139,15 +137,97 @@ export function TeamColumn({ title, team, onAdd, onUpdate, onRemove, canAdd }: T
           {/* Abilities and items and moves */}
           <div className="mt-3 grid-cols-2 gap-4 text-sm">
             <div>
-              <p><span className="font-semibold">Pokemon: </span>{focusedPokemon.species}</p>
-              <p><span className="font-semibold">Item: </span>{focusedPokemon.item}</p>
-              <p><span className="font-semibold">Ability: </span>{focusedPokemon.ability}</p>
+              <p>
+                <span className="font-semibold">
+                  Pokemon: 
+                </span>
+                <input
+                type = "text"
+                value = {focusedPokemon.species || ''}
+                spellCheck = {false}
+                className = "bg-transparent focus:outline-none w-full text-center"
+                onChange ={(e) => {
+                  const newSpecies = String(e.target.value);
+                  setFocusedPokemon((prev): Pokemon | null => {
+                    if (!prev) return prev;
+                    
+                    return {
+                      ...prev,
+                      species: newSpecies,
+                    };
+                  });
+                }}
+                />
+                </p>
+              <p><span className="font-semibold">
+                Item: 
+                </span>
+                <input
+                type = "text"
+                value = {focusedPokemon.item || ''}
+                spellCheck = {false}
+                className = "bg-transparent focus:outline-none w-full text-center"
+                onChange ={(e) => {
+                  const newItem = String(e.target.value);
+                  setFocusedPokemon((prev): Pokemon | null => {
+                    if (!prev) return prev;
+                    
+                    return {
+                      ...prev,
+                      item: newItem,
+                    };
+                  });
+                }}
+                />
+                </p>
+              <p>
+                <span className="font-semibold">
+                  Ability: 
+                  </span>
+                  <input
+                type = "text"
+                value = {focusedPokemon.ability || ''}
+                className = "bg-transparent focus:outline-none w-full text-center"
+                spellCheck = {false}
+                onChange ={(e) => {
+                  const newAbility = String(e.target.value);
+                  setFocusedPokemon((prev): Pokemon | null => {
+                    if (!prev) return prev;
+                    
+                    return {
+                      ...prev,
+                      ability: newAbility,
+                    };
+                  });
+                }}
+                />
+                  </p>
             </div>
             <div>
               <p className="font-semibold mb-1">Moves</p>
               <ul className="list-none ml-4 space-y-1">
                 {focusedPokemon.moves.map((move, moveIdx) => (
-                  <li className = "list-none" key={moveIdx}>{move}</li>
+                  <li className = "list-none flex items-center justify-center w-full" key={moveIdx}>
+                      <input
+                      type="text"
+                      value={move}
+                      className="bg-transparent focus:outline-none w-full text-center"
+                      onChange={(e) => {
+                        const newMove = String(e.target.value);
+                        setFocusedPokemon((prev): Pokemon | null => {
+                          if (!prev) return prev;
+
+                          const currentMoves = prev.moves ?? [];
+                          const updatedMoves = currentMoves.map((m, i) => (i === moveIdx ? newMove : m));
+
+                          return {
+                            ...prev,
+                            moves: updatedMoves,
+                          };
+                        });
+                      }}
+                    />
+                  </li>
                 ))}
               </ul>
             </div>
@@ -161,18 +241,8 @@ export function TeamColumn({ title, team, onAdd, onUpdate, onRemove, canAdd }: T
                 <div className="flex justify-between mb-1">
                   <span>{stat.toUpperCase()}</span>
                   <span>{ev}</span>
-                </div>
-
-                {/* Progress bar */}
-                <div className="bg-gray-200 w-48 h-2 rounded overflow-hidden mb-2">
-                  <div
-                    className="bg-green-400 h-full transition-all duration-300"
-                    style={{ width: `${(ev / 252) * 100}%` }}
-                  />
-                </div>
-
-                {/* Slider input */}
-                <input
+                  {/* Slider input */}
+                  <input
                   type="range"
                   min={0}
                   max={252}
@@ -203,6 +273,7 @@ export function TeamColumn({ title, team, onAdd, onUpdate, onRemove, canAdd }: T
 
                   className="w-48 accent-green-500"
                 />
+                </div>
               </div>
             ))}
             </div>
@@ -210,7 +281,6 @@ export function TeamColumn({ title, team, onAdd, onUpdate, onRemove, canAdd }: T
           <button onClick = {() => {
             setFocusedPokemon(null);
             setFocusedPokemonIndex(null);
-            setEvs(undefined);
           }}>Back to Team View</button>
         </>
       )}
