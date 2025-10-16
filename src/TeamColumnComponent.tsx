@@ -1,10 +1,12 @@
 // Put this component in the same file below App or in a new TeamColumn.tsx and import it.
 import { useState, useEffect } from 'react';
 import { getSpriteUrl } from '../utils/Sprites';
-
+import { getTypesForSpecies, validateSpecies } from '../utils/PokemonInfo';
+import { typeColors } from '../utils/TypeColors';
 
   type Pokemon = {
     name?: string | null;
+    types?: string[];
     species: string;
     item?: string | null;
     gender?: string | null;
@@ -28,7 +30,24 @@ export function TeamColumn({ title, team, onAdd, onUpdate, onRemove, canAdd }: T
   
   const [focusedPokemonIndex, setFocusedPokemonIndex] = useState<number | null>(null);
   const [focusedPokemon, setFocusedPokemon] = useState<Pokemon | null> (null);
+  
+  const handleConfirm = async (updatePoke: Pokemon, PokeIndex: number) => {
+    if (!updatePoke) return;
+    const currentSpecies = updatePoke.species;
+    const valid = await validateSpecies(currentSpecies);
 
+    if (!valid) {
+      alert("Invalid species name");
+      return;
+    }
+    // Call the onUpdate prop
+    onUpdate(PokeIndex!, updatePoke!);
+
+    //Reset focus
+    setFocusedPokemon(null);
+    setFocusedPokemonIndex(null);
+
+  }
   // focus control handled inline via setFocusedSlot
 
   // Render fixed 6 slots (0..5). If team has fewer than 6, show "Empty slot" UI.
@@ -38,13 +57,19 @@ export function TeamColumn({ title, team, onAdd, onUpdate, onRemove, canAdd }: T
       {focusedPokemon === null ? (
       <ul className = "list-none block">
       {team.map((poke, idx) => (
+        <>
         <li value = {idx} className = "list-none relative" onClick = {() => {
         setFocusedPokemon(poke); 
         setFocusedPokemonIndex(idx);
         }}>
 
           <div className = "flex justify-between items-start mb-2">
-            <input type="text" placeholder = "Nickname" value = {poke.name || ''} className = "font-semibold text-lg bg-transparent border-b border-grey-300 focus:outline-none w-1/2"/>
+            <input 
+            type="text" 
+            placeholder = "Nickname" 
+            value = {poke.name || ''} 
+            className = "font-semibold text-lg bg-transparent border-b border-grey-300 focus:outline-none w-1/2"
+            />
           </div>
           {/* Pokemon Sprite and info */}
           <div className = "flex items-center gap-4">
@@ -52,15 +77,18 @@ export function TeamColumn({ title, team, onAdd, onUpdate, onRemove, canAdd }: T
             alt = {poke.species} className = 'w-16 h-16'/>
             <div className = "flex-1 grid grid-cols-2 gap-2 text-sm">
               <div>
-                <p><span className = "font-semibold">Level:</span></p>
-                <p><span className = "font-semibold">Gender:</span></p>
-                <p><span className = "font-semibold">Shiny:</span></p>
-              </div>
-              <div>
-                <p><span className = "font-semibold">Tera Type:</span></p>
+                <p><span className = "font-semibold">Type:</span></p>
                 <div className = 'flex gap-1 mt-1'>
-                  <span className="px-2 py-0.5 bg-pink-400 text-white text-xs rounded">Type 1</span>
-                  <span className="px-2 py-0.5 bg-blue-400 text-white text-xs rounded">Type 2</span>
+                  {poke?.types?.map((type, typeIdx) => (
+                    <span 
+                    key={typeIdx} 
+                    className="px-2 py-0.5 bg-gray-400 text-white text-xs rounded"
+                    style = {{backgroundColor: typeColors[type] || '#6b7280'}}
+                    >
+                      {type}
+                    </span>
+                  ))}
+
                 </div>
               </div>
             </div>
@@ -106,14 +134,41 @@ export function TeamColumn({ title, team, onAdd, onUpdate, onRemove, canAdd }: T
             ))}
             </div>
           </div>
-
         </li>
+        <button
+          className="text-red-600 hover:text-red-800 font-semibold"
+          onClick = {() => onRemove(idx)}
+        >
+          Remove
+        </button>
+
+        </>
       ))}
       </ul>
-      ) : (
+      ) 
+      : 
+      (        
         <>
+        {/* FOCUS EDITING MODE */}
+        {/* Nickname */}
         <div className = "flex justify-between items-start mb-2">
-            <input type="text" placeholder = "Nickname" value = {focusedPokemon.name || ''} className = "font-semibold text-lg bg-transparent border-b border-grey-300 focus:outline-none w-1/2"/>
+            <input 
+            type="text" 
+            placeholder = "Nickname" 
+            value = {focusedPokemon.name || ''} 
+            className = "font-semibold text-lg bg-transparent border-b border-grey-300 focus:outline-none w-1/2"
+            onChange = {(e) => {
+              const newName = String(e.target.value);
+              setFocusedPokemon((prev): Pokemon | null => {
+                if (!prev) return prev;
+                
+                return {
+                  ...prev,
+                  name: newName,
+                };
+              });
+            }}
+            />
           </div>
           {/* Pokemon Sprite and info */}
           <div className = "flex items-center gap-4">
@@ -121,52 +176,55 @@ export function TeamColumn({ title, team, onAdd, onUpdate, onRemove, canAdd }: T
             alt = {focusedPokemon.species} className = 'w-16 h-16'/>
             <div className = "flex-1 grid grid-cols-2 gap-2 text-sm">
               <div>
-                <p><span className = "font-semibold">Level:</span></p>
-                <p><span className = "font-semibold">Gender:</span></p>
-                <p><span className = "font-semibold">Shiny:</span></p>
-              </div>
-              <div>
-                <p><span className = "font-semibold">Tera Type:</span></p>
+                <p><span className = "font-semibold">Type:</span></p>
                 <div className = 'flex gap-1 mt-1'>
-                  <span className="px-2 py-0.5 bg-pink-400 text-white text-xs rounded">Type 1</span>
-                  <span className="px-2 py-0.5 bg-blue-400 text-white text-xs rounded">Type 2</span>
+                  {focusedPokemon?.types?.map((type, typeIdx) => (
+                    <span 
+                    key={typeIdx} 
+                    className="px-2 py-0.5 text-white text-xs rounded"
+                    style = {{backgroundColor: typeColors[type] || '#6b7280'}}
+                    >
+                      {type}
+                    </span>
+                  ))}
                 </div>
               </div>
             </div>
           </div>
           {/* Abilities and items and moves */}
           <div className="mt-3 grid-cols-2 gap-4 text-sm">
-            <div>
-              <p>
-                <span className="font-semibold">
+            <div className = "space-y-2">
+              <p className = "flex items-center gap-2">
+                <span className="w-24 font-semibold">
                   Pokemon: 
                 </span>
                 <input
                 type = "text"
                 value = {focusedPokemon.species || ''}
                 spellCheck = {false}
-                className = "bg-transparent focus:outline-none w-full text-center"
-                onChange ={(e) => {
-                  const newSpecies = String(e.target.value);
-                  setFocusedPokemon((prev): Pokemon | null => {
-                    if (!prev) return prev;
-                    
-                    return {
-                      ...prev,
-                      species: newSpecies,
-                    };
-                  });
+                className = "bg-white border border-gray-300 rounded px-2 py-1 focus:ring-2 focus:ring-indigo-500  bg-transparent focus:outline-none w-50 text-center min-w-0 text-left"
+                onChange={(e) => {
+                  const newSpecies = e.target.value;
+                  setFocusedPokemon((prev) => prev ? { ...prev, species: newSpecies } : prev);
+                }}
+                onBlur={async (e) => {
+                  const newSpecies = e.target.value;
+                  const newTypes = await getTypesForSpecies(newSpecies);
+                  setFocusedPokemon((prev) =>
+                    prev ? { ...prev, types: newTypes } : prev
+                  );
                 }}
                 />
                 </p>
-              <p><span className="font-semibold">
+              <p className = "flex items-center gap-2">
+                <span className="w-24 font-semibold">
                 Item: 
                 </span>
                 <input
                 type = "text"
                 value = {focusedPokemon.item || ''}
                 spellCheck = {false}
-                className = "bg-transparent focus:outline-none w-full text-center"
+                className = "bg-white border border-gray-300 rounded px-2 py-1 focus:ring-2 focus:ring-indigo-500  bg-transparent focus:outline-none w-50 text-center min-w-0 text-left left-50"
                 onChange ={(e) => {
                   const newItem = String(e.target.value);
                   setFocusedPokemon((prev): Pokemon | null => {
@@ -180,14 +238,14 @@ export function TeamColumn({ title, team, onAdd, onUpdate, onRemove, canAdd }: T
                 }}
                 />
                 </p>
-              <p>
-                <span className="font-semibold">
+              <p className = "flex items-center gap-2">
+                <span className="w-24 font-semibold">
                   Ability: 
                   </span>
                   <input
                 type = "text"
                 value = {focusedPokemon.ability || ''}
-                className = "bg-transparent focus:outline-none w-full text-center"
+                className = "bg-white border border-gray-300 rounded px-2 py-1 focus:ring-2 focus:ring-indigo-500  bg-transparent focus:outline-none w-50 text-center min-w-0 text-left"
                 spellCheck = {false}
                 onChange ={(e) => {
                   const newAbility = String(e.target.value);
@@ -204,14 +262,14 @@ export function TeamColumn({ title, team, onAdd, onUpdate, onRemove, canAdd }: T
                   </p>
             </div>
             <div>
-              <p className="font-semibold mb-1">Moves</p>
+              <p className="font-semibold mb-1 flex">Moves</p>
               <ul className="list-none ml-4 space-y-1">
                 {focusedPokemon.moves.map((move, moveIdx) => (
                   <li className = "list-none flex items-center justify-center w-full" key={moveIdx}>
                       <input
                       type="text"
                       value={move}
-                      className="bg-transparent focus:outline-none w-full text-center"
+                      className="bg-white border border-gray-300 rounded px-2 py-1 focus:ring-2 focus:ring-indigo-500 w-full text-center"
                       onChange={(e) => {
                         const newMove = String(e.target.value);
                         setFocusedPokemon((prev): Pokemon | null => {
@@ -279,8 +337,7 @@ export function TeamColumn({ title, team, onAdd, onUpdate, onRemove, canAdd }: T
             </div>
           </div>
           <button onClick = {() => {
-            setFocusedPokemon(null);
-            setFocusedPokemonIndex(null);
+            handleConfirm(focusedPokemon!, focusedPokemonIndex!);
           }}>Back to Team View</button>
         </>
       )}

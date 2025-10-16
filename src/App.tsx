@@ -6,6 +6,7 @@ function App() {
   type Pokemon = {
     name?: string | null;
     species: string;
+    types?: string[];
     item?: string | null;
     gender?: string | null;
     ability?: string | null;
@@ -26,7 +27,8 @@ function App() {
     "evs": {"hp": 252, "atk": 0, "def": 0, "spa": 252, "spd": 4, "spe": 0},
     "nature": "Modest",
     "ivs": {"hp": 31, "atk": 31, "def": 31, "spa": 30, "spd": 30, "spe": 31},
-    "moves": ["Ice Beam", "Hurricane", "Substitute", "Roost"]
+    "moves": ["Ice Beam", "Hurricane", "Substitute", "Roost"],
+    "types": ["ice", "flying"]
   },
   {
     "name": "",
@@ -36,7 +38,8 @@ function App() {
     "ability": "Swift Swim",
     "evs": {"hp": 4, "atk": 0, "def": 0, "spa": 252, "spd": 0, "spe": 252},
     "nature": "Modest",
-    "moves": ["Surf", "Giga Drain", "Ice Beam", "Rain Dance"]
+    "moves": ["Surf", "Giga Drain", "Ice Beam", "Rain Dance"],
+    "types": ["water", "grass"]
   },
   {
     "name": "",
@@ -46,7 +49,8 @@ function App() {
     "ability": "Prankster",
     "evs": {"hp": 248, "atk": 0, "def": 252, "spa": 0, "spd": 8, "spe": 0},
     "nature": "Bold",
-    "moves": ["Tail Glow", "Baton Pass", "Encore", "Rain Dance"]
+    "moves": ["Tail Glow", "Baton Pass", "Encore", "Rain Dance"],
+    "types": ["bug"]
   },
   {
     "name": "",
@@ -56,7 +60,8 @@ function App() {
     "ability": "Swift Swim",
     "evs": {"hp": 0, "atk": 0, "def": 0, "spa": 252, "spd": 4, "spe": 252},
     "nature": "Modest",
-    "moves": ["Hydro Pump", "Earth Power", "Stealth Rock", "Rain Dance"]
+    "moves": ["Hydro Pump", "Earth Power", "Stealth Rock", "Rain Dance"],
+    "types": ["water", "ground"]
   },
   {
     "name": "",
@@ -66,7 +71,8 @@ function App() {
     "ability": "Regenerator",
     "evs": {"hp": 252, "atk": 0, "def": 252, "spa": 0, "spd": 4, "spe": 0},
     "nature": "Bold",
-    "moves": ["Quick Attack", "Protect", "Toxic", "Rain Dance"]
+    "moves": ["Quick Attack", "Protect", "Toxic", "Rain Dance"],
+    "types": ["water"]
   },
   {
     "name": "",
@@ -76,7 +82,8 @@ function App() {
     "ability": "Swift Swim",
     "evs": {"hp": 128, "atk": 252, "def": 4, "spa": 0, "spd": 0, "spe": 124},
     "nature": "Adamant",
-    "moves": ["X-Scissor", "Stone Edge", "Aqua Tail", "Rapid Spin"]
+    "moves": ["X-Scissor", "Stone Edge", "Aqua Tail", "Rapid Spin"],
+    "types": ["rock", "bug"]
    }]);
   const [team2, setTeam2] = useState<Pokemon[]>([{
     "name": "",
@@ -87,7 +94,8 @@ function App() {
     "evs": {"hp": 252, "atk": 0, "def": 0, "spa": 252, "spd": 4, "spe": 0},
     "nature": "Modest",
     "ivs": {"hp": 31, "atk": 31, "def": 31, "spa": 30, "spd": 30, "spe": 31},
-    "moves": ["Ice Beam", "Hurricane", "Substitute", "Roost"]
+    "moves": ["Ice Beam", "Hurricane", "Substitute", "Roost"],
+    "types": ["ice", "flying"]
   },
   {
     "name": "",
@@ -97,7 +105,8 @@ function App() {
     "ability": "Swift Swim",
     "evs": {"hp": 4, "atk": 0, "def": 0, "spa": 252, "spd": 0, "spe": 252},
     "nature": "Modest",
-    "moves": ["Surf", "Giga Drain", "Ice Beam", "Rain Dance"]
+    "moves": ["Surf", "Giga Drain", "Ice Beam", "Rain Dance"],
+    "types": ["water", "grass"]
   },
   {
     "name": "",
@@ -107,7 +116,8 @@ function App() {
     "ability": "Prankster",
     "evs": {"hp": 248, "atk": 0, "def": 252, "spa": 0, "spd": 8, "spe": 0},
     "nature": "Bold",
-    "moves": ["Tail Glow", "Baton Pass", "Encore", "Rain Dance"]
+    "moves": ["Tail Glow", "Baton Pass", "Encore", "Rain Dance"],
+    "types": ["bug"]
   },
   {
     "name": "",
@@ -117,7 +127,8 @@ function App() {
     "ability": "Swift Swim",
     "evs": {"hp": 0, "atk": 0, "def": 0, "spa": 252, "spd": 4, "spe": 252},
     "nature": "Modest",
-    "moves": ["Hydro Pump", "Earth Power", "Stealth Rock", "Rain Dance"]
+    "moves": ["Hydro Pump", "Earth Power", "Stealth Rock", "Rain Dance"],
+    "types": ["water", "ground"]
   },
   {
     "name": "",
@@ -127,7 +138,8 @@ function App() {
     "ability": "Regenerator",
     "evs": {"hp": 252, "atk": 0, "def": 252, "spa": 0, "spd": 4, "spe": 0},
     "nature": "Bold",
-    "moves": ["Quick Attack", "Protect", "Toxic", "Rain Dance"]
+    "moves": ["Quick Attack", "Protect", "Toxic", "Rain Dance"],
+    "types": ["water"]
   },
   {
     "name": "",
@@ -137,7 +149,8 @@ function App() {
     "ability": "Swift Swim",
     "evs": {"hp": 128, "atk": 252, "def": 4, "spa": 0, "spd": 0, "spe": 124},
     "nature": "Adamant",
-    "moves": ["X-Scissor", "Stone Edge", "Aqua Tail", "Rapid Spin"]
+    "moves": ["X-Scissor", "Stone Edge", "Aqua Tail", "Rapid Spin"],
+    "types": ["rock", "bug"]
    }]);
 
   // team expand/collapse state removed in favor of TeamColumn component
@@ -148,18 +161,21 @@ function App() {
     return team.length < MAX_TEAM_SIZE;
   }
 
+  //onAdd
   function addPokemonToTeam(setTeam: React.Dispatch<React.SetStateAction<Pokemon[]>>, team: Pokemon[], pokemon: Pokemon): boolean {
     if (!canAddToTeam(team)) return false; 
       setTeam([...team, pokemon]);
       return true;
   }
 
+  //onUpdate
   function updatePokemonInTeam(setTeam: React.Dispatch<React.SetStateAction<Pokemon[]>>, team: Pokemon[], index: number, updatedPokemon: Partial<Pokemon>): boolean {
     if (index < 0 || index >= team.length) return false;
     setTeam(prev => prev.map((p,i) => (i=== index ? {...p,...updatedPokemon } : p)));
     return true;
   }
 
+  //onRemove
   function removePokemonFromTeam(setTeam: React.Dispatch<React.SetStateAction<Pokemon[]>>, team: Pokemon[], index: number): boolean {
     if (index < 0 || index >= team.length) return false;
     setTeam(prev => prev.filter((_,i) => i !== index));
