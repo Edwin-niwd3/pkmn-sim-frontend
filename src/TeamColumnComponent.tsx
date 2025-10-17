@@ -1,5 +1,5 @@
 // Put this component in the same file below App or in a new TeamColumn.tsx and import it.
-import { useState, useEffect } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { getSpriteUrl } from '../utils/Sprites';
 import { getTypesForSpecies, validateSpecies } from '../utils/PokemonInfo';
 import { typeColors } from '../utils/TypeColors';
@@ -52,6 +52,7 @@ export function TeamColumn({ title, team, onAdd, onUpdate, onRemove, canAdd }: T
     setFocusedPokemon(null);
     setFocusedPokemonIndex(null);
   }
+
   const handleCreate = () => {
     const newPoke: Pokemon = {
       species: 'Pikachu',
@@ -64,9 +65,17 @@ export function TeamColumn({ title, team, onAdd, onUpdate, onRemove, canAdd }: T
     setAddFlag(true);
   }
 
+  const topRef = useRef<HTMLDivElement | null> (null);
+
+  useEffect(() => {
+    if(focusedPokemon && topRef.current) {
+      topRef.current.scrollIntoView({behavior: "smooth", block: "start"});
+    }
+  }, [focusedPokemon]);
+
   // Render fixed 6 slots (0..5). If team has fewer than 6, show "Empty slot" UI.
   return (
-    <div className = "max-w-md bg-slate-100 border border-grey-300 rounded-xl shadow-md overflow-hidden p-4">
+    <div ref = {topRef} className = "max-w-md bg-slate-100 border border-grey-300 rounded-xl shadow-md overflow-hidden p-4">
       {title}
       {focusedPokemon === null ? (
       <>

@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useLocalStorageState } from './hooks/useLocalStorageState';
 import './App.css'
 import { TeamColumn } from './TeamColumnComponent';
 
@@ -18,142 +19,144 @@ function App() {
 
   
 
-  const [team1, setTeam1] = useState<Pokemon[]>([{
-    "name": "",
-    "species": "Articuno",
-    "gender": "",
-    "item": "Leftovers",
-    "ability": "Pressure",
-    "evs": {"hp": 252, "atk": 0, "def": 0, "spa": 252, "spd": 4, "spe": 0},
-    "nature": "Modest",
-    "ivs": {"hp": 31, "atk": 31, "def": 31, "spa": 30, "spd": 30, "spe": 31},
-    "moves": ["Ice Beam", "Hurricane", "Substitute", "Roost"],
-    "types": ["ice", "flying"]
-  },
-  {
-    "name": "",
-    "species": "Ludicolo",
-    "gender": "",
-    "item": "Life Orb",
-    "ability": "Swift Swim",
-    "evs": {"hp": 4, "atk": 0, "def": 0, "spa": 252, "spd": 0, "spe": 252},
-    "nature": "Modest",
-    "moves": ["Surf", "Giga Drain", "Ice Beam", "Rain Dance"],
-    "types": ["water", "grass"]
-  },
-  {
-    "name": "",
-    "species": "Volbeat",
-    "gender": "M",
-    "item": "Damp Rock",
-    "ability": "Prankster",
-    "evs": {"hp": 248, "atk": 0, "def": 252, "spa": 0, "spd": 8, "spe": 0},
-    "nature": "Bold",
-    "moves": ["Tail Glow", "Baton Pass", "Encore", "Rain Dance"],
-    "types": ["bug"]
-  },
-  {
-    "name": "",
-    "species": "Seismitoad",
-    "gender": "",
-    "item": "Life Orb",
-    "ability": "Swift Swim",
-    "evs": {"hp": 0, "atk": 0, "def": 0, "spa": 252, "spd": 4, "spe": 252},
-    "nature": "Modest",
-    "moves": ["Hydro Pump", "Earth Power", "Stealth Rock", "Rain Dance"],
-    "types": ["water", "ground"]
-  },
-  {
-    "name": "",
-    "species": "Alomomola",
-    "gender": "",
-    "item": "Damp Rock",
-    "ability": "Regenerator",
-    "evs": {"hp": 252, "atk": 0, "def": 252, "spa": 0, "spd": 4, "spe": 0},
-    "nature": "Bold",
-    "moves": ["Quick Attack", "Protect", "Toxic", "Rain Dance"],
-    "types": ["water"]
-  },
-  {
-    "name": "",
-    "species": "Armaldo",
-    "gender": "",
-    "item": "Leftovers",
-    "ability": "Swift Swim",
-    "evs": {"hp": 128, "atk": 252, "def": 4, "spa": 0, "spd": 0, "spe": 124},
-    "nature": "Adamant",
-    "moves": ["X-Scissor", "Stone Edge", "Aqua Tail", "Rapid Spin"],
-    "types": ["rock", "bug"]
-   }]);
-  const [team2, setTeam2] = useState<Pokemon[]>([{
-    "name": "",
-    "species": "Articuno",
-    "gender": "",
-    "item": "Leftovers",
-    "ability": "Pressure",
-    "evs": {"hp": 252, "atk": 0, "def": 0, "spa": 252, "spd": 4, "spe": 0},
-    "nature": "Modest",
-    "ivs": {"hp": 31, "atk": 31, "def": 31, "spa": 30, "spd": 30, "spe": 31},
-    "moves": ["Ice Beam", "Hurricane", "Substitute", "Roost"],
-    "types": ["ice", "flying"]
-  },
-  {
-    "name": "",
-    "species": "Ludicolo",
-    "gender": "",
-    "item": "Life Orb",
-    "ability": "Swift Swim",
-    "evs": {"hp": 4, "atk": 0, "def": 0, "spa": 252, "spd": 0, "spe": 252},
-    "nature": "Modest",
-    "moves": ["Surf", "Giga Drain", "Ice Beam", "Rain Dance"],
-    "types": ["water", "grass"]
-  },
-  {
-    "name": "",
-    "species": "Volbeat",
-    "gender": "M",
-    "item": "Damp Rock",
-    "ability": "Prankster",
-    "evs": {"hp": 248, "atk": 0, "def": 252, "spa": 0, "spd": 8, "spe": 0},
-    "nature": "Bold",
-    "moves": ["Tail Glow", "Baton Pass", "Encore", "Rain Dance"],
-    "types": ["bug"]
-  },
-  {
-    "name": "",
-    "species": "Seismitoad",
-    "gender": "",
-    "item": "Life Orb",
-    "ability": "Swift Swim",
-    "evs": {"hp": 0, "atk": 0, "def": 0, "spa": 252, "spd": 4, "spe": 252},
-    "nature": "Modest",
-    "moves": ["Hydro Pump", "Earth Power", "Stealth Rock", "Rain Dance"],
-    "types": ["water", "ground"]
-  },
-  {
-    "name": "",
-    "species": "Alomomola",
-    "gender": "",
-    "item": "Damp Rock",
-    "ability": "Regenerator",
-    "evs": {"hp": 252, "atk": 0, "def": 252, "spa": 0, "spd": 4, "spe": 0},
-    "nature": "Bold",
-    "moves": ["Quick Attack", "Protect", "Toxic", "Rain Dance"],
-    "types": ["water"]
-  },
-  {
-    "name": "",
-    "species": "Armaldo",
-    "gender": "",
-    "item": "Leftovers",
-    "ability": "Swift Swim",
-    "evs": {"hp": 128, "atk": 252, "def": 4, "spa": 0, "spd": 0, "spe": 124},
-    "nature": "Adamant",
-    "moves": ["X-Scissor", "Stone Edge", "Aqua Tail", "Rapid Spin"],
-    "types": ["rock", "bug"]
-   }]);
+  // const [team1, setTeam1] = useState<Pokemon[]>([{
+  //   "name": "",
+  //   "species": "Articuno",
+  //   "gender": "",
+  //   "item": "Leftovers",
+  //   "ability": "Pressure",
+  //   "evs": {"hp": 252, "atk": 0, "def": 0, "spa": 252, "spd": 4, "spe": 0},
+  //   "nature": "Modest",
+  //   "ivs": {"hp": 31, "atk": 31, "def": 31, "spa": 30, "spd": 30, "spe": 31},
+  //   "moves": ["Ice Beam", "Hurricane", "Substitute", "Roost"],
+  //   "types": ["ice", "flying"]
+  // },
+  // {
+  //   "name": "",
+  //   "species": "Ludicolo",
+  //   "gender": "",
+  //   "item": "Life Orb",
+  //   "ability": "Swift Swim",
+  //   "evs": {"hp": 4, "atk": 0, "def": 0, "spa": 252, "spd": 0, "spe": 252},
+  //   "nature": "Modest",
+  //   "moves": ["Surf", "Giga Drain", "Ice Beam", "Rain Dance"],
+  //   "types": ["water", "grass"]
+  // },
+  // {
+  //   "name": "",
+  //   "species": "Volbeat",
+  //   "gender": "M",
+  //   "item": "Damp Rock",
+  //   "ability": "Prankster",
+  //   "evs": {"hp": 248, "atk": 0, "def": 252, "spa": 0, "spd": 8, "spe": 0},
+  //   "nature": "Bold",
+  //   "moves": ["Tail Glow", "Baton Pass", "Encore", "Rain Dance"],
+  //   "types": ["bug"]
+  // },
+  // {
+  //   "name": "",
+  //   "species": "Seismitoad",
+  //   "gender": "",
+  //   "item": "Life Orb",
+  //   "ability": "Swift Swim",
+  //   "evs": {"hp": 0, "atk": 0, "def": 0, "spa": 252, "spd": 4, "spe": 252},
+  //   "nature": "Modest",
+  //   "moves": ["Hydro Pump", "Earth Power", "Stealth Rock", "Rain Dance"],
+  //   "types": ["water", "ground"]
+  // },
+  // {
+  //   "name": "",
+  //   "species": "Alomomola",
+  //   "gender": "",
+  //   "item": "Damp Rock",
+  //   "ability": "Regenerator",
+  //   "evs": {"hp": 252, "atk": 0, "def": 252, "spa": 0, "spd": 4, "spe": 0},
+  //   "nature": "Bold",
+  //   "moves": ["Quick Attack", "Protect", "Toxic", "Rain Dance"],
+  //   "types": ["water"]
+  // },
+  // {
+  //   "name": "",
+  //   "species": "Armaldo",
+  //   "gender": "",
+  //   "item": "Leftovers",
+  //   "ability": "Swift Swim",
+  //   "evs": {"hp": 128, "atk": 252, "def": 4, "spa": 0, "spd": 0, "spe": 124},
+  //   "nature": "Adamant",
+  //   "moves": ["X-Scissor", "Stone Edge", "Aqua Tail", "Rapid Spin"],
+  //   "types": ["rock", "bug"]
+  //  }]);
+  // const [team2, setTeam2] = useState<Pokemon[]>([{
+  //   "name": "",
+  //   "species": "Articuno",
+  //   "gender": "",
+  //   "item": "Leftovers",
+  //   "ability": "Pressure",
+  //   "evs": {"hp": 252, "atk": 0, "def": 0, "spa": 252, "spd": 4, "spe": 0},
+  //   "nature": "Modest",
+  //   "ivs": {"hp": 31, "atk": 31, "def": 31, "spa": 30, "spd": 30, "spe": 31},
+  //   "moves": ["Ice Beam", "Hurricane", "Substitute", "Roost"],
+  //   "types": ["ice", "flying"]
+  // },
+  // {
+  //   "name": "",
+  //   "species": "Ludicolo",
+  //   "gender": "",
+  //   "item": "Life Orb",
+  //   "ability": "Swift Swim",
+  //   "evs": {"hp": 4, "atk": 0, "def": 0, "spa": 252, "spd": 0, "spe": 252},
+  //   "nature": "Modest",
+  //   "moves": ["Surf", "Giga Drain", "Ice Beam", "Rain Dance"],
+  //   "types": ["water", "grass"]
+  // },
+  // {
+  //   "name": "",
+  //   "species": "Volbeat",
+  //   "gender": "M",
+  //   "item": "Damp Rock",
+  //   "ability": "Prankster",
+  //   "evs": {"hp": 248, "atk": 0, "def": 252, "spa": 0, "spd": 8, "spe": 0},
+  //   "nature": "Bold",
+  //   "moves": ["Tail Glow", "Baton Pass", "Encore", "Rain Dance"],
+  //   "types": ["bug"]
+  // },
+  // {
+  //   "name": "",
+  //   "species": "Seismitoad",
+  //   "gender": "",
+  //   "item": "Life Orb",
+  //   "ability": "Swift Swim",
+  //   "evs": {"hp": 0, "atk": 0, "def": 0, "spa": 252, "spd": 4, "spe": 252},
+  //   "nature": "Modest",
+  //   "moves": ["Hydro Pump", "Earth Power", "Stealth Rock", "Rain Dance"],
+  //   "types": ["water", "ground"]
+  // },
+  // {
+  //   "name": "",
+  //   "species": "Alomomola",
+  //   "gender": "",
+  //   "item": "Damp Rock",
+  //   "ability": "Regenerator",
+  //   "evs": {"hp": 252, "atk": 0, "def": 252, "spa": 0, "spd": 4, "spe": 0},
+  //   "nature": "Bold",
+  //   "moves": ["Quick Attack", "Protect", "Toxic", "Rain Dance"],
+  //   "types": ["water"]
+  // },
+  // {
+  //   "name": "",
+  //   "species": "Armaldo",
+  //   "gender": "",
+  //   "item": "Leftovers",
+  //   "ability": "Swift Swim",
+  //   "evs": {"hp": 128, "atk": 252, "def": 4, "spa": 0, "spd": 0, "spe": 124},
+  //   "nature": "Adamant",
+  //   "moves": ["X-Scissor", "Stone Edge", "Aqua Tail", "Rapid Spin"],
+  //   "types": ["rock", "bug"]
+  //  }]);
 
   // team expand/collapse state removed in favor of TeamColumn component
+  const [team1, setTeam1] = useLocalStorageState<Pokemon[]>("team1", []);
+  const [team2, setTeam2] = useLocalStorageState<Pokemon[]>("team2", []);
 
   const MAX_TEAM_SIZE = 6;
 
