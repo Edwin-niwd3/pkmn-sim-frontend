@@ -30,6 +30,7 @@ export function TeamColumn({ title, team, onAdd, onUpdate, onRemove, canAdd }: T
   
   const [focusedPokemonIndex, setFocusedPokemonIndex] = useState<number | null>(null);
   const [focusedPokemon, setFocusedPokemon] = useState<Pokemon | null> (null);
+  const [addFlag, setAddFlag] = useState<boolean>(false);
   
   const handleConfirm = async (updatePoke: Pokemon, PokeIndex: number) => {
     if (!updatePoke) return;
@@ -41,20 +42,34 @@ export function TeamColumn({ title, team, onAdd, onUpdate, onRemove, canAdd }: T
       return;
     }
     // Call the onUpdate prop
-    onUpdate(PokeIndex!, updatePoke!);
+    if (addFlag) {
+      const success = onAdd(updatePoke);
+      setAddFlag(false);
+    }
+    else {onUpdate(PokeIndex!, updatePoke!);}
 
     //Reset focus
     setFocusedPokemon(null);
     setFocusedPokemonIndex(null);
-
   }
-  // focus control handled inline via setFocusedSlot
+  const handleCreate = () => {
+    const newPoke: Pokemon = {
+      species: 'Pikachu',
+      moves: ["Volt Tackle", "Iron Tail", "Quick Attack", "Thunder Wave"],
+      evs: {hp: 4, atk: 252, def: 0, spa: 252, spd: 0, spe: 0},
+      types: ['electric'],
+    };
+    setFocusedPokemon(newPoke);
+    setFocusedPokemonIndex(team.length);
+    setAddFlag(true);
+  }
 
   // Render fixed 6 slots (0..5). If team has fewer than 6, show "Empty slot" UI.
   return (
     <div className = "max-w-md bg-slate-100 border border-grey-300 rounded-xl shadow-md overflow-hidden p-4">
       {title}
       {focusedPokemon === null ? (
+      <>
       <ul className = "list-none block">
       {team.map((poke, idx) => (
         <>
@@ -145,6 +160,10 @@ export function TeamColumn({ title, team, onAdd, onUpdate, onRemove, canAdd }: T
         </>
       ))}
       </ul>
+      {team.length < 6 && canAdd && (
+        <button onClick = {() => {handleCreate()}}>Add Pokemon</button>
+      )}
+      </>
       ) 
       : 
       (        
@@ -341,9 +360,7 @@ export function TeamColumn({ title, team, onAdd, onUpdate, onRemove, canAdd }: T
           }}>Back to Team View</button>
         </>
       )}
-      {team.length < 6 && canAdd && (
-        <button>Add Pokemon</button>
-      )}
+      
     </div>
   );
 }
