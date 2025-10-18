@@ -187,7 +187,10 @@ function App() {
 
   // Note: sprite and pokedex URL helpers removed (not used in this simplified App)
 
-
+  const handleSingles = () => {
+    console.log("This is team 1: " + team1)
+    console.log("This is team 2: " + team2)
+  }
 
   return (
     <>
@@ -195,6 +198,21 @@ function App() {
         <h1 className = "text-3xl font-bold">
           Pokemon Win Rate Calculator
         </h1>
+        <div className = "text-center">
+          {/* Begin Battle Area */}
+          <button 
+          className = "px-5 py-2 rounded-full bg-white text-black font-bold border-4 border-black shadow-[2px_2px_0_#000] hover:translate-y-0.5 hover:shadow-[1px_1px_0_#000} active:translate-y-1 active:shadow-none transition m-4"
+          onClick = {handleSingles}
+          >
+            Singles  
+          </button>
+          <button 
+          className = "px-5 py-2 rounded-full bg-white text-black font-bold border-4 border-black shadow-[2px_2px_0_#000] hover:translate-y-0.5 hover:shadow-[1px_1px_0_#000} active:translate-y-1 active:shadow-none transition m-4"
+          onClick = {handleSingles}
+          >
+            Doubles 
+          </button>
+        </div>
         <div className = "text-center grid grid-cols-2 gap-4">
           {/*First section*/}
           <div className = "bg-white/10 p-4 rounded-lg backdrop-blur-md border border-white/20">
