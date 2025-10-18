@@ -187,9 +187,19 @@ function App() {
 
   // Note: sprite and pokedex URL helpers removed (not used in this simplified App)
 
-  const handleSingles = () => {
-    console.log("This is team 1: " + team1)
-    console.log("This is team 2: " + team2)
+  const handleSingles = async () => {
+    const res = await fetch('http://localhost:3000/simulation/begin', {
+      method: 'POST',
+      headers: {
+        'Content-type': 'application/json',
+      },
+      body: JSON.stringify({
+        team1Json: team1,
+        team2Json: team2,
+      })
+    });
+    const result = await res.json();
+    console.log(result);
   }
 
   return (

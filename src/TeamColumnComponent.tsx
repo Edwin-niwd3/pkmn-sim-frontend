@@ -59,6 +59,7 @@ export function TeamColumn({ title, team, onAdd, onUpdate, onRemove, canAdd }: T
       moves: ["Volt Tackle", "Iron Tail", "Quick Attack", "Thunder Wave"],
       evs: {hp: 4, atk: 252, def: 0, spa: 252, spd: 0, spe: 0},
       types: ['electric'],
+      ability: 'lightning rod'
     };
     setFocusedPokemon(newPoke);
     setFocusedPokemonIndex(team.length);
