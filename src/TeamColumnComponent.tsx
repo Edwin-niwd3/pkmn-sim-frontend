@@ -135,9 +135,9 @@ export function TeamColumn({ title, team, onAdd, onUpdate, onRemove, canAdd }: T
               </ul>
             </div>
           </div>
-          {/*Stats*/}
+          {/*Evs*/}
           <div className="mt-3">
-            <p className="font-semibold mb-1 text-sm">Stats</p>
+            <p className="font-semibold mb-1 text-sm">Evs</p>
             <div className="space-y-1 text-sm">
             {Object.entries(poke.evs ?? {}).map(([stat, ev]) => (
               <div key={stat} className="flex items-center justify-between gap-3">
@@ -320,9 +320,9 @@ export function TeamColumn({ title, team, onAdd, onUpdate, onRemove, canAdd }: T
               </ul>
             </div>
           </div>
-          {/*Stats*/}
+          {/*Evs*/}
           <div className="mt-3">
-            <p className="font-semibold mb-1 text-sm">Stats</p>
+            <p className="font-semibold mb-1 text-sm">Evs</p>
             <div className="space-y-1 text-sm">
             {Object.entries(focusedPokemon.evs ?? {}).map(([stat, ev]) => (
               <div key={stat} className="mb-4">

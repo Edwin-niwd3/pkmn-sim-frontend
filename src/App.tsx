@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react'
 import { useLocalStorageState } from './hooks/useLocalStorageState';
 import './App.css'
 import { TeamColumn } from './TeamColumnComponent';
+import {Bouncy} from 'ldrs/react';
+import 'ldrs/react/Bouncy.css'
 
 function App() {
   type Pokemon = {
@@ -23,7 +25,9 @@ function App() {
   const [team2, setTeam2] = useLocalStorageState<Pokemon[]>("team2", []);
   const [error1, setError1] = useState<String | null>(null);
   const [error2, setError2] = useState<String | null>(null);
-  const [selectedFormat, setSelectedFormat] = useState("gen9ou");
+  const [selectedFormat, setSelectedFormat] = useState<string>("gen9ou");
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [results, setResults] = useState<Record<string, any> | null>(null);
   const formats = 
   {  "Random Battle" :"gen9randombattle",
     "Unrated Random Battle" : "gen9unratedrandombattle",
@@ -71,7 +75,8 @@ function App() {
   // Note: sprite and pokedex URL helpers removed (not used in this simplified App)
 
   const handleSingles = async () => {
-    const res = await fetch('http://localhost:3000/simulation/begin', {
+    setIsLoading(true);
+    const res = await fetch('http://localhost:3000/simulation/abtest', {
       method: 'POST',
       headers: {
         'Content-type': 'application/json',
@@ -79,6 +84,8 @@ function App() {
       body: JSON.stringify({
         team1Json: team1,
         team2Json: team2,
+        formatJson: selectedFormat,
+        numSimulations: 100,
       })
     });
     const result = await res.json();
@@ -90,6 +97,9 @@ function App() {
     {
       setError2(result['errorTeam2']);
     }
+    console.log(result)
+    setResults(result);
+    setIsLoading(false);
   }
 
   if (error1 || error2) {
@@ -122,6 +132,57 @@ function App() {
         </div>
       </>
     )
+  }
+
+  if (isLoading) {
+    return (
+      <>
+      <Bouncy
+      size = "45"
+      speed = "1.75"
+      color = "Blue"
+      />
+      </>
+    )
+  }
+
+  if(results) {
+    return(
+      <>
+        <div className = "flex justify-center">
+        <div className = "max-w-md bg-slate-100 border border-grey-300 rounded-xl shadow-md overflow-hidden p-4">
+          <p>{results.message}</p>
+          <p>Average Duration Per Battle: {results.averageDurationMs}ms</p>
+          
+          <p>Stats</p>
+          <p>Draws: {results.draws}</p>
+          <div className = "grid grid-cols-2">
+            <div>
+              <h1>
+                Team 1
+              </h1>
+              <p>Team 1 win rate: {results.winRates.player1}</p>
+              <p>Number of games won: {results.player1Wins}</p>
+            </div>
+            <div>
+              <h1>
+                Team 2
+              </h1>
+              <p>Player 2 win rate: {results.winRates.player2}</p>
+              <p>Number of games won: {results.player2Wins}</p>
+            </div>
+          </div>
+          <button
+          onClick = {() => {
+            setResults(null);
+          }}
+          >
+            Return
+          </button>
+          </div>
+          </div>
+        </>
+      )
   }
 
   return (
