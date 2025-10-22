@@ -94,6 +94,7 @@ export function TeamColumn({ title, team, onAdd, onUpdate, onRemove, canAdd }: T
             placeholder = "Nickname" 
             value = {poke.name || ''} 
             className = "font-semibold text-lg bg-transparent border-b border-grey-300 focus:outline-none w-1/2"
+            readOnly
             />
           </div>
           {/* Pokemon Sprite and info */}

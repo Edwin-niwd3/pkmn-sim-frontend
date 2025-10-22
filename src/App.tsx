@@ -17,146 +17,29 @@ function App() {
     moves: string[];
   }
 
-  
-
-  // const [team1, setTeam1] = useState<Pokemon[]>([{
-  //   "name": "",
-  //   "species": "Articuno",
-  //   "gender": "",
-  //   "item": "Leftovers",
-  //   "ability": "Pressure",
-  //   "evs": {"hp": 252, "atk": 0, "def": 0, "spa": 252, "spd": 4, "spe": 0},
-  //   "nature": "Modest",
-  //   "ivs": {"hp": 31, "atk": 31, "def": 31, "spa": 30, "spd": 30, "spe": 31},
-  //   "moves": ["Ice Beam", "Hurricane", "Substitute", "Roost"],
-  //   "types": ["ice", "flying"]
-  // },
-  // {
-  //   "name": "",
-  //   "species": "Ludicolo",
-  //   "gender": "",
-  //   "item": "Life Orb",
-  //   "ability": "Swift Swim",
-  //   "evs": {"hp": 4, "atk": 0, "def": 0, "spa": 252, "spd": 0, "spe": 252},
-  //   "nature": "Modest",
-  //   "moves": ["Surf", "Giga Drain", "Ice Beam", "Rain Dance"],
-  //   "types": ["water", "grass"]
-  // },
-  // {
-  //   "name": "",
-  //   "species": "Volbeat",
-  //   "gender": "M",
-  //   "item": "Damp Rock",
-  //   "ability": "Prankster",
-  //   "evs": {"hp": 248, "atk": 0, "def": 252, "spa": 0, "spd": 8, "spe": 0},
-  //   "nature": "Bold",
-  //   "moves": ["Tail Glow", "Baton Pass", "Encore", "Rain Dance"],
-  //   "types": ["bug"]
-  // },
-  // {
-  //   "name": "",
-  //   "species": "Seismitoad",
-  //   "gender": "",
-  //   "item": "Life Orb",
-  //   "ability": "Swift Swim",
-  //   "evs": {"hp": 0, "atk": 0, "def": 0, "spa": 252, "spd": 4, "spe": 252},
-  //   "nature": "Modest",
-  //   "moves": ["Hydro Pump", "Earth Power", "Stealth Rock", "Rain Dance"],
-  //   "types": ["water", "ground"]
-  // },
-  // {
-  //   "name": "",
-  //   "species": "Alomomola",
-  //   "gender": "",
-  //   "item": "Damp Rock",
-  //   "ability": "Regenerator",
-  //   "evs": {"hp": 252, "atk": 0, "def": 252, "spa": 0, "spd": 4, "spe": 0},
-  //   "nature": "Bold",
-  //   "moves": ["Quick Attack", "Protect", "Toxic", "Rain Dance"],
-  //   "types": ["water"]
-  // },
-  // {
-  //   "name": "",
-  //   "species": "Armaldo",
-  //   "gender": "",
-  //   "item": "Leftovers",
-  //   "ability": "Swift Swim",
-  //   "evs": {"hp": 128, "atk": 252, "def": 4, "spa": 0, "spd": 0, "spe": 124},
-  //   "nature": "Adamant",
-  //   "moves": ["X-Scissor", "Stone Edge", "Aqua Tail", "Rapid Spin"],
-  //   "types": ["rock", "bug"]
-  //  }]);
-  // const [team2, setTeam2] = useState<Pokemon[]>([{
-  //   "name": "",
-  //   "species": "Articuno",
-  //   "gender": "",
-  //   "item": "Leftovers",
-  //   "ability": "Pressure",
-  //   "evs": {"hp": 252, "atk": 0, "def": 0, "spa": 252, "spd": 4, "spe": 0},
-  //   "nature": "Modest",
-  //   "ivs": {"hp": 31, "atk": 31, "def": 31, "spa": 30, "spd": 30, "spe": 31},
-  //   "moves": ["Ice Beam", "Hurricane", "Substitute", "Roost"],
-  //   "types": ["ice", "flying"]
-  // },
-  // {
-  //   "name": "",
-  //   "species": "Ludicolo",
-  //   "gender": "",
-  //   "item": "Life Orb",
-  //   "ability": "Swift Swim",
-  //   "evs": {"hp": 4, "atk": 0, "def": 0, "spa": 252, "spd": 0, "spe": 252},
-  //   "nature": "Modest",
-  //   "moves": ["Surf", "Giga Drain", "Ice Beam", "Rain Dance"],
-  //   "types": ["water", "grass"]
-  // },
-  // {
-  //   "name": "",
-  //   "species": "Volbeat",
-  //   "gender": "M",
-  //   "item": "Damp Rock",
-  //   "ability": "Prankster",
-  //   "evs": {"hp": 248, "atk": 0, "def": 252, "spa": 0, "spd": 8, "spe": 0},
-  //   "nature": "Bold",
-  //   "moves": ["Tail Glow", "Baton Pass", "Encore", "Rain Dance"],
-  //   "types": ["bug"]
-  // },
-  // {
-  //   "name": "",
-  //   "species": "Seismitoad",
-  //   "gender": "",
-  //   "item": "Life Orb",
-  //   "ability": "Swift Swim",
-  //   "evs": {"hp": 0, "atk": 0, "def": 0, "spa": 252, "spd": 4, "spe": 252},
-  //   "nature": "Modest",
-  //   "moves": ["Hydro Pump", "Earth Power", "Stealth Rock", "Rain Dance"],
-  //   "types": ["water", "ground"]
-  // },
-  // {
-  //   "name": "",
-  //   "species": "Alomomola",
-  //   "gender": "",
-  //   "item": "Damp Rock",
-  //   "ability": "Regenerator",
-  //   "evs": {"hp": 252, "atk": 0, "def": 252, "spa": 0, "spd": 4, "spe": 0},
-  //   "nature": "Bold",
-  //   "moves": ["Quick Attack", "Protect", "Toxic", "Rain Dance"],
-  //   "types": ["water"]
-  // },
-  // {
-  //   "name": "",
-  //   "species": "Armaldo",
-  //   "gender": "",
-  //   "item": "Leftovers",
-  //   "ability": "Swift Swim",
-  //   "evs": {"hp": 128, "atk": 252, "def": 4, "spa": 0, "spd": 0, "spe": 124},
-  //   "nature": "Adamant",
-  //   "moves": ["X-Scissor", "Stone Edge", "Aqua Tail", "Rapid Spin"],
-  //   "types": ["rock", "bug"]
-  //  }]);
 
   // team expand/collapse state removed in favor of TeamColumn component
   const [team1, setTeam1] = useLocalStorageState<Pokemon[]>("team1", []);
   const [team2, setTeam2] = useLocalStorageState<Pokemon[]>("team2", []);
+  const [error1, setError1] = useState<String | null>(null);
+  const [error2, setError2] = useState<String | null>(null);
+  const [selectedFormat, setSelectedFormat] = useState("gen9ou");
+  const formats = 
+  {  "Random Battle" :"gen9randombattle",
+    "Unrated Random Battle" : "gen9unratedrandombattle",
+    "Free-For_all random Battle": "gen9freeforallrandombattle",
+    "Random Battle (Blitz)": "gen9randombattleblitz",
+    "OU" : "gen9ou",
+    "Ubers" : "gen9ubers",
+    "UU": "gen9uu",
+    "RU": "gen9ru",
+    "NU" : "gen9nu",
+    "PU" : "gen9pu",
+    "LC": "gen9lc",
+    "Monotype": "gen9monotype",
+    "CAP": "gen9cap",
+    "BSS Reg J": "gen9bssregj",
+  }
 
   const MAX_TEAM_SIZE = 6;
 
@@ -199,7 +82,46 @@ function App() {
       })
     });
     const result = await res.json();
-    console.log(result);
+    if (result['errorTeam1'])
+    {
+      setError1(result['errorTeam1']);
+    }
+    if (result['errorTeam2'])
+    {
+      setError2(result['errorTeam2']);
+    }
+  }
+
+  if (error1 || error2) {
+    return (
+      <>
+      <div className = "flex justify-center">
+      <div className = "max-w-md bg-slate-100 border border-grey-300 rounded-xl shadow-md overflow-hidden p-4">
+        {error1 && (
+          <>
+          <p>
+            Team One: {error1}
+          </p>
+          </>
+        )}
+        {error2 && (
+          <p>
+            Team Two: {error2}
+          </p>
+        )}
+
+        <button
+        onClick = {() => {
+          setError1(null);
+          setError2(null);
+        }}
+        >
+          Return
+        </button>
+        </div>
+        </div>
+      </>
+    )
   }
 
   return (
@@ -222,6 +144,17 @@ function App() {
           >
             Doubles 
           </button>
+          <select
+          value = {selectedFormat}
+          onChange={(e) => setSelectedFormat(e.target.value)}
+          className = "px-5 py-2 rounded-full bg-white text-black font-bold shadow-[2px_2px_0_#000] hover:translate-y-0.5 hover:shadow-[1px_1px_0_#000} active:translate-y-1 active:shadow-none transition m-4"
+          >
+          {Object.entries(formats ?? {}).map(([formatName, formatValue]) => (
+            <option key = {formatValue} value= {formatValue}>
+              {formatName}
+            </option>
+          ))}
+          </select>
         </div>
         <div className = "text-center grid grid-cols-2 gap-4">
           {/*First section*/}
