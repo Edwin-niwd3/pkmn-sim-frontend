@@ -1,7 +1,7 @@
 import {slugifySpecies} from './Sprites';
 
 const typeCache = new Map<string, string[]>();
-const validCache = new Set<string>();
+const validCache = new Set<string>(["thundurus", "landorus", "tornadus", "calyrex-shadow-rider"]);
 
 export async function getTypesForSpecies(species: string): Promise<string[]> {
   if (!validateSpecies(species)) return [];
@@ -27,6 +27,7 @@ export async function getTypesForSpecies(species: string): Promise<string[]> {
 export async function validateSpecies(species: string): Promise<boolean> {
   if (!species) return false;
   const slug = slugifySpecies(species);
+  if (slug == "thundurus" || slug == "landorus" || slug == "tornadus") return true;
   if (validCache.has(slug)) return true;
   const res = await fetch(`https://pokeapi.co/api/v2/pokemon/${slug}`);
   if( res.ok) {

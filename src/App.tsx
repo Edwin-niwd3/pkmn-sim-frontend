@@ -43,6 +43,7 @@ function App() {
     "Monotype": "gen9monotype",
     "CAP": "gen9cap",
     "BSS Reg J": "gen9bssregj",
+    "Anything Goes": "gen9anythinggoes",
   }
 
   const MAX_TEAM_SIZE = 6;
@@ -124,6 +125,7 @@ function App() {
         onClick = {() => {
           setError1(null);
           setError2(null);
+          setResults(null);
         }}
         >
           Return
@@ -168,7 +170,7 @@ function App() {
               <h1>
                 Team 2
               </h1>
-              <p>Player 2 win rate: {results.winRates.player2}</p>
+              <p>Team 2 win rate: {results.winRates.player2}</p>
               <p>Number of games won: {results.player2Wins}</p>
             </div>
           </div>
