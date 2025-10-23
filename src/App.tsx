@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useLocalStorageState } from './hooks/useLocalStorageState';
 import './App.css'
+import {formats} from '../utils/Formats'
 import { TeamColumn } from './TeamColumnComponent';
 import {Bouncy} from 'ldrs/react';
 import 'ldrs/react/Bouncy.css'
@@ -19,7 +20,6 @@ function App() {
     moves: string[];
   }
 
-
   // team expand/collapse state removed in favor of TeamColumn component
   const [team1, setTeam1] = useLocalStorageState<Pokemon[]>("team1", []);
   const [team2, setTeam2] = useLocalStorageState<Pokemon[]>("team2", []);
@@ -29,23 +29,6 @@ function App() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [results, setResults] = useState<Record<string, any> | null>(null);
   const [numAttempts, setNumAttempts] = useState<number>(50);
-  const formats = 
-  {  "Random Battle" :"gen9randombattle",
-    "Unrated Random Battle" : "gen9unratedrandombattle",
-    "Free-For_all random Battle": "gen9freeforallrandombattle",
-    "Random Battle (Blitz)": "gen9randombattleblitz",
-    "OU" : "gen9ou",
-    "Ubers" : "gen9ubers",
-    "UU": "gen9uu",
-    "RU": "gen9ru",
-    "NU" : "gen9nu",
-    "PU" : "gen9pu",
-    "LC": "gen9lc",
-    "Monotype": "gen9monotype",
-    "CAP": "gen9cap",
-    "BSS Reg J": "gen9bssregj",
-    "Anything Goes": "gen9anythinggoes",
-  }
 
   const MAX_TEAM_SIZE = 6;
 
