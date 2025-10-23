@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useLocalStorageState } from './hooks/useLocalStorageState';
 import './App.css'
 import { TeamColumn } from './TeamColumnComponent';
