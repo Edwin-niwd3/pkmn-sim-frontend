@@ -2,23 +2,13 @@ import { useState } from 'react'
 import { useLocalStorageState } from './hooks/useLocalStorageState';
 import './App.css'
 import {formats} from '../utils/Formats'
+import {type Pokemon} from '../utils/Pokemon'
 import { TeamColumn } from './TeamColumnComponent';
 import {Bouncy} from 'ldrs/react';
 import 'ldrs/react/Bouncy.css'
 
 function App() {
-  type Pokemon = {
-    name?: string | null;
-    species: string;
-    types?: string[];
-    item?: string | null;
-    gender?: string | null;
-    ability?: string | null;
-    nature?: string;
-    evs?: Record<string, number>;
-    ivs?: Record<string, number>;
-    moves: string[];
-  }
+
 
   // team expand/collapse state removed in favor of TeamColumn component
   const [team1, setTeam1] = useLocalStorageState<Pokemon[]>("team1", []);
@@ -56,8 +46,6 @@ function App() {
     setTeam(prev => prev.filter((_,i) => i !== index));
     return true;
   }
-
-  // Note: sprite and pokedex URL helpers removed (not used in this simplified App)
 
   const handleSingles = async () => {
     setIsLoading(true);
