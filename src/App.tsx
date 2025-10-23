@@ -28,6 +28,7 @@ function App() {
   const [selectedFormat, setSelectedFormat] = useState<string>("gen9ou");
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [results, setResults] = useState<Record<string, any> | null>(null);
+  const [numAttempts, setNumAttempts] = useState<number>(50);
   const formats = 
   {  "Random Battle" :"gen9randombattle",
     "Unrated Random Battle" : "gen9unratedrandombattle",
@@ -86,7 +87,7 @@ function App() {
         team1Json: team1,
         team2Json: team2,
         formatJson: selectedFormat,
-        numSimulations: 100,
+        numSimulations: numAttempts,
       })
     });
     const result = await res.json();
@@ -193,32 +194,45 @@ function App() {
         <h1 className = "text-3xl font-bold">
           Pokemon Win Rate Calculator
         </h1>
-        <div className = "text-center">
-          {/* Begin Battle Area */}
-          <button 
-          className = "px-5 py-2 rounded-full bg-white text-black font-bold border-4 border-black shadow-[2px_2px_0_#000] hover:translate-y-0.5 hover:shadow-[1px_1px_0_#000} active:translate-y-1 active:shadow-none transition m-4"
-          onClick = {handleSingles}
-          >
-            Singles  
-          </button>
-          <button 
-          className = "px-5 py-2 rounded-full bg-white text-black font-bold border-4 border-black shadow-[2px_2px_0_#000] hover:translate-y-0.5 hover:shadow-[1px_1px_0_#000} active:translate-y-1 active:shadow-none transition m-4"
-          onClick = {handleSingles}
-          >
-            Doubles 
-          </button>
-          <select
-          value = {selectedFormat}
-          onChange={(e) => setSelectedFormat(e.target.value)}
-          className = "px-5 py-2 rounded-full bg-white text-black font-bold shadow-[2px_2px_0_#000] hover:translate-y-0.5 hover:shadow-[1px_1px_0_#000} active:translate-y-1 active:shadow-none transition m-4"
-          >
-          {Object.entries(formats ?? {}).map(([formatName, formatValue]) => (
-            <option key = {formatValue} value= {formatValue}>
-              {formatName}
-            </option>
-          ))}
-          </select>
+
+        {/* Begin Battle Area */}
+        <div className = "text-center grid grid-cols-3">
+          <div>
+            <select
+            value = {selectedFormat}
+            onChange={(e) => setSelectedFormat(e.target.value)}
+            className = "px-5 py-2 rounded-full bg-white text-black font-bold shadow-[2px_2px_0_#000] hover:translate-y-0.5 hover:shadow-[1px_1px_0_#000} active:translate-y-1 active:shadow-none transition m-4"
+            >
+            {Object.entries(formats ?? {}).map(([formatName, formatValue]) => (
+              <option key = {formatValue} value= {formatValue}>
+                {formatName}
+              </option>
+            ))}
+            </select>
+          </div>
+
+          <div>
+            <select
+            value = {numAttempts}
+            onChange= {(e) => setNumAttempts(Number(e.target.value))}
+            className = "px-5 py-2 rounded-full bg-white text-black font-bold shadow-[2px_2px_0_#000] hover:translate-y-0.5 hover:shadow-[1px_1px_0_#000} active:translate-y-1 active:shadow-none transition m-4"
+            >
+              <option key = "100" value="100">100</option>
+              <option key = "500" value="500">500</option>
+              <option key = "1000" value="1000">1000</option>
+            </select>
+          </div>
+
+          <div>  
+            <button 
+            className = "px-5 py-2 rounded-full bg-white text-black font-bold border-4 border-black shadow-[2px_2px_0_#000] hover:translate-y-0.5 hover:shadow-[1px_1px_0_#000} active:translate-y-1 active:shadow-none transition m-4"
+            onClick = {handleSingles}
+            >
+              Begin Battle  
+            </button>
+          </div>
         </div>
+
         <div className = "text-center grid grid-cols-2 gap-4">
           {/*First section*/}
           <div className = "bg-white/10 p-4 rounded-lg backdrop-blur-md border border-white/20">
