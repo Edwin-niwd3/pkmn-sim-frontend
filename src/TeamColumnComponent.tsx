@@ -3,19 +3,7 @@ import { useState, useRef, useEffect } from 'react';
 import { getSpriteUrl } from '../utils/Sprites';
 import { getTypesForSpecies, validateSpecies } from '../utils/PokemonInfo';
 import { typeColors } from '../utils/TypeColors';
-
-  type Pokemon = {
-    name?: string | null;
-    types?: string[];
-    species: string;
-    item?: string | null;
-    gender?: string | null;
-    ability?: string | null;
-    nature?: string;
-    evs?: Record<string, number>;
-    ivs?: Record<string, number>;
-    moves: string[];
-  }
+import {type Pokemon} from '../utils/Pokemon';
 
 type TeamColumnProps = {
   title: string;
