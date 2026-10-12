@@ -30,3 +30,7 @@ button {
   transition: border-color 0.25s;
 }
 
+select {
+  cursor: pointer;
+}
+

@@ -18,7 +18,7 @@ function App() {
   const [selectedFormat, setSelectedFormat] = useState<string>("gen9ou");
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [results, setResults] = useState<Record<string, any> | null>(null);
-  const [numAttempts, setNumAttempts] = useState<number>(50);
+  const [numAttempts, setNumAttempts] = useState<number>(100);
 
   const MAX_TEAM_SIZE = 6;
 
@@ -185,9 +185,12 @@ function App() {
           <div>
             <select
             value = {numAttempts}
-            onChange= {(e) => setNumAttempts(Number(e.target.value))}
-            className = "px-5 py-2 rounded-full bg-white text-black font-bold shadow-[2px_2px_0_#000] hover:translate-y-0.5 hover:shadow-[1px_1px_0_#000} active:translate-y-1 active:shadow-none transition m-4"
+            onChange= {(e) => {
+              setNumAttempts(Number(e.target.value))
+            }}
+            className = "px-5 py-2 rounded-full bg-white text-black font-bold shadow-[2px_2px_0_#000] hover:translate-y-0.5 hover:shadow-[1px_1px_0_#000] active:translate-y-1 active:shadow-none transition m-4"
             >
+              <option key= "50" value="50">50</option>
               <option key = "100" value="100">100</option>
               <option key = "500" value="500">500</option>
               <option key = "1000" value="1000">1000</option>
