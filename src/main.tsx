@@ -6,7 +6,7 @@ import App from './App.tsx'
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <App />
-    <footer className = "text-center text-xs text-slate-800 px-4 py-6">
+    <footer className = "text-center text-xs text-slate-300 px-4 py-6">
       <p>
         This is an unofficial fan project, not affiliated with or endorsed by Nintendo, Game Freak or The Pokémon Company.
         Pokémon and all related names are trademarks of their respective owners.

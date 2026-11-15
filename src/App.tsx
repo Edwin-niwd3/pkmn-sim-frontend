@@ -151,7 +151,7 @@ function App() {
           <PokemonSprite key = {theirs.species} species = {theirs.species} className = "absolute top-0 right-4 w-28 animate-lunge-left motion-reduce:animate-none"/>
           <PokemonSprite key = {mine.species} species = {mine.species} back className = "absolute bottom-0 left-4 w-28 animate-lunge-right motion-reduce:animate-none"/>
         </div>
-        <p className = "text-slate-600"> Simulated {completed} / {numAttempts} battles</p>
+        <p className = "text-slate-200"> Simulated {completed} / {numAttempts} battles</p>
         <div className = "w-64 h-3 bg-white/40 rounded-full overflow-hidden">
           <div 
           className = "h-full bg-green-500 transition-all duration-300"
@@ -176,7 +176,7 @@ function App() {
   return (
     <>
   <div className = "min-h-screen flex flex-col justify-start items-center gap-4 py-8">
-        <h1 className = "text-3xl font-bold">
+        <h1 className = "text-3xl font-bold text-white">
           Pokemon Win Rate Calculator
         </h1>
 

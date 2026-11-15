@@ -106,4 +106,3 @@ Species, item, ability, and move names use Showdown's display names, for example
 ## Roadmap
 
 1. Import teams from Showdown's text export format.
-2. A calmer page background.
