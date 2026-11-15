@@ -1,9 +1,10 @@
-import { useState , useEffect} from 'react'
+import { useState , useEffect, useRef} from 'react'
 import { useLocalStorageState } from './hooks/useLocalStorageState';
 import './App.css'
 import {formats} from '../utils/Formats'
 import {defaultTeam1, defaultTeam2, DEFAULT_FORMAT} from '../utils/DefaultTeams'
-import {type Pokemon} from '../utils/Pokemon'
+import {type Pokemon, type SimulationResults} from '../utils/Pokemon'
+import {mergeResults} from '../utils/mergeResults'
 import { TeamColumn } from './TeamColumnComponent';
 import 'ldrs/react/Bouncy.css'
 import { PokemonSprite } from '../utils/Sprites';
@@ -19,6 +20,7 @@ async function fetchTeamErrors(team: Pokemon[], format: string): Promise<string[
     return result.error ?? null;
 }
 
+const BATCH_SIZE = 25;
 
 function App() {
 
@@ -31,9 +33,12 @@ function App() {
   const [selectedFormat, setSelectedFormat] = useState<string>(DEFAULT_FORMAT);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [battlers, setBattlers] = useState<[Pokemon, Pokemon] | null>(null);
-  const [results, setResults] = useState<Record<string, any> | null>(null);
+  const [results, setResults] = useState<SimulationResults | null>(null);
   const [numAttempts, setNumAttempts] = useState<number>(100);
   const [requestError, setRequestError] = useState<string | null>(null);
+  const [completed, setCompleted] = useState<number>(0);
+  const [cancelling, setCancelling] = useState(false);
+  const cancelRef = useRef(false);
 
   const MAX_TEAM_SIZE = 6;
 
@@ -80,39 +85,56 @@ function App() {
     return () => { cancelled = true;};
   }, [team2, selectedFormat]);
 
-  const handleSingles = async () => {
+  const handleBattles = async () => {
+    setCancelling(false);
+    cancelRef.current = false;
     setRequestError(null);
     setIsLoading(true);
+    setCompleted(0);
     const pick = (t: Pokemon[]) => t[Math.floor(Math.random() * t.length)];
     setBattlers([pick(team1), pick(team2)]);
+    let total: SimulationResults | null = null;
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/simulation/abtest`, {
-      method: 'POST',
-      headers: {
-        'Content-type': 'application/json',
-      },
-      body: JSON.stringify({
-        team1Json: team1,
-        team2Json: team2,
-        formatJson: selectedFormat,
-        numSimulations: numAttempts,
-      })
-    });
-    const result = await res.json();
-    if(result.errorTeam1 || result.errorTeam2) {
-      setError1(result.errorTeam1 ?? null);
-      setError2(result.errorTeam2 ?? null);
-      return;
+
+      let remaining = numAttempts;
+
+      while(remaining > 0) {
+        if (cancelRef.current) break;
+        const size = Math.min(BATCH_SIZE, remaining);
+
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/simulation/abtest`, {
+          method: 'POST',
+          headers: { 'Content-type': 'application/json' },
+          body: JSON.stringify({
+            team1Json: team1,
+            team2Json: team2,
+            formatJson: selectedFormat,
+            numSimulations: size,
+          }),
+        });
+        const result = await res.json();
+
+        if (result.errorTeam1 || result.errorTeam2) {
+          setError1(result.errorTeam1 ?? null);
+          setError2(result.errorTeam2 ?? null);
+          return;
+        }
+        if (!res.ok || result.error) {
+          setRequestError(result.error ?? 'An error occurred during the simulation. Please try again later.');
+          return;
+        }
+
+        total = mergeResults(total, result);
+        remaining -= size;
+        setCompleted(numAttempts-remaining);
+      }
+      setResults(total);
     }
-    if(!res.ok || result.error) {
-      setRequestError(result.error ?? 'An error occurred during the simulation. Please try again later.');
-      return;
-    }
-    setResults(result);
-    }
+        
     catch (error) {
       console.error('Error during simulation:', error);
       setRequestError('An error occurred during the simulation. Please try again later.');
+      if(total) setResults(total)
     }
     finally {
       setIsLoading(false);
@@ -128,7 +150,20 @@ function App() {
           <PokemonSprite key = {theirs.species} species = {theirs.species} className = "absolute top-0 right-4 w-28 animate-lunge-left motion-reduce:animate-none"/>
           <PokemonSprite key = {mine.species} species = {mine.species} back className = "absolute bottom-0 left-4 w-28 animate-lunge-right motion-reduce:animate-none"/>
         </div>
-        <p className = "text-slate-600"> Simulating {numAttempts} battles...</p>
+        <p className = "text-slate-600"> Simulated {completed} / {numAttempts} battles</p>
+        <div className = "w-64 h-3 bg-white/40 rounded-full overflow-hidden">
+          <div 
+          className = "h-full bg-green-500 transition-all duration-300"
+          style = {{ width: `${(completed/numAttempts) * 100}%`}}
+          />
+        </div>
+        <button 
+            className = "px-5 py-2 rounded-full bg-white text-black font-bold border-4 border-black shadow-[2px_2px_0_#000] hover:translate-y-0.5 hover:shadow-[1px_1px_0_#000} active:translate-y-1 active:shadow-none transition m-4"
+            onClick = {() => {cancelRef.current = true; setCancelling(true);}}
+            disabled = {cancelling}
+            >
+              {cancelling ? 'Cancelling...' : 'Cancel'}
+        </button>
       </div>
     );
   }
@@ -185,7 +220,7 @@ function App() {
             <button 
             className = "px-5 py-2 rounded-full bg-white text-black font-bold border-4 border-black shadow-[2px_2px_0_#000] hover:translate-y-0.5 hover:shadow-[1px_1px_0_#000} active:translate-y-1 active:shadow-none transition m-4 disabled:opacity-50 disabled:cursor-not-allowed"
             disabled = {!!error1 || !!error2}
-            onClick = {handleSingles}
+            onClick = {handleBattles}
             >
               Begin Battle
             </button>

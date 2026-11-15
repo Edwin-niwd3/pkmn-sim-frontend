@@ -1,9 +1,10 @@
 
 import { type monStats } from "../utils/Pokemon";
 import { MonStatCard } from "./MonStatCard";
+import { type SimulationResults } from "../utils/Pokemon";
 
 type resultsProps = { 
-  results: Record<string, any>;
+  results: SimulationResults;
   onReturn: () => void;
 }
 

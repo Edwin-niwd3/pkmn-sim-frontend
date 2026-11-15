@@ -48,7 +48,7 @@ Other scripts:
 1. Each team column lets you add, edit, and remove Pokemon. A new Pokemon starts as a Pikachu template that you edit in place.
 2. Teams are saved to browser `localStorage` under the keys `team1` and `team2`, so they survive a refresh.
 3. Species names are validated and typed by fetching from PokeAPI. Sprites and Pokedex links come from external sources via `utils/Sprites.tsx`.
-4. Pressing **Begin Battle** sends both teams, the selected format, and the battle count to `POST /simulation/abtest` on the backend. The results page shows the win rates plus a card per Pokemon with its faint count, average lifespan in turns, and most-used move.
+4. Pressing **Begin Battle** sends both teams and the selected format to `POST /simulation/abtest` on the backend in batches of 25 battles, one request after another, and adds the batch results together. The loading screen shows a progress bar and a **Cancel** button; cancelling keeps the results of the batches that already finished. The results page shows the win rates plus a card per Pokemon with its faint count, average lifespan in turns, and most-used move.
 5. **Load Test Teams** fills both columns with built-in VGC teams and selects a matching format.
 6. Each team is checked against the selected format by `POST /simulation/validate` whenever the team or the format changes. Any problems are listed in red at the top of that team's column, and **Begin Battle** is disabled until both teams are legal.
 
@@ -74,6 +74,7 @@ utils/
   DefaultTeams.ts           Built-in test teams
   PokemonInfo.ts            PokeAPI lookups for species validation and types
   Sprites.tsx               Species name slugs, sprite and Pokedex URLs
+  mergeResults.ts           Adds one batch of results to the running total
   TypeColors.ts             Type badge colours
 ```
 
