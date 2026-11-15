@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState , useEffect} from 'react'
 import { useLocalStorageState } from './hooks/useLocalStorageState';
 import './App.css'
 import {formats} from '../utils/Formats'
@@ -9,6 +9,16 @@ import 'ldrs/react/Bouncy.css'
 import { PokemonSprite } from '../utils/Sprites';
 import { ResultsPage } from './ResultsPage';
 
+async function fetchTeamErrors(team: Pokemon[], format: string): Promise<string[] | null> {
+    const res = await fetch(`${import.meta.env.VITE_API_URL}/simulation/validate`, {
+      method: 'POST',
+      headers: { 'Content-type': 'application/json' },
+      body: JSON.stringify({ teamJson: team, formatJson: format}),
+    });
+    const result = await res.json();
+    return result.error ?? null;
+}
+
 
 function App() {
 
@@ -16,13 +26,14 @@ function App() {
   // team expand/collapse state removed in favor of TeamColumn component
   const [team1, setTeam1] = useLocalStorageState<Pokemon[]>("team1", defaultTeam1);
   const [team2, setTeam2] = useLocalStorageState<Pokemon[]>("team2", defaultTeam2);
-  const [error1, setError1] = useState<String | null>(null);
-  const [error2, setError2] = useState<String | null>(null);
+  const [error1, setError1] = useState<string[] | null>(null);
+  const [error2, setError2] = useState<string[] | null>(null);
   const [selectedFormat, setSelectedFormat] = useState<string>(DEFAULT_FORMAT);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [battlers, setBattlers] = useState<[Pokemon, Pokemon] | null>(null);
   const [results, setResults] = useState<Record<string, any> | null>(null);
   const [numAttempts, setNumAttempts] = useState<number>(100);
+  const [requestError, setRequestError] = useState<string | null>(null);
 
   const MAX_TEAM_SIZE = 6;
 
@@ -51,11 +62,31 @@ function App() {
     return true;
   }
 
+  
+
+  useEffect(() => {
+    let cancelled = false;
+    fetchTeamErrors(team1, selectedFormat)
+    .then(errors => { if (!cancelled) setError1(errors); })
+    .catch(() => { if (!cancelled) setError1(null); });
+    return () => { cancelled = true;};
+  }, [team1, selectedFormat]);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetchTeamErrors(team2, selectedFormat)
+    .then(errors => { if (!cancelled) setError2(errors); })
+    .catch(() => { if (!cancelled) setError2(null); });
+    return () => { cancelled = true;};
+  }, [team2, selectedFormat]);
+
   const handleSingles = async () => {
+    setRequestError(null);
     setIsLoading(true);
     const pick = (t: Pokemon[]) => t[Math.floor(Math.random() * t.length)];
     setBattlers([pick(team1), pick(team2)]);
-    const res = await fetch(`${import.meta.env.VITE_API_URL}/simulation/abtest`, {
+    try {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/simulation/abtest`, {
       method: 'POST',
       headers: {
         'Content-type': 'application/json',
@@ -68,50 +99,24 @@ function App() {
       })
     });
     const result = await res.json();
-    if (result['errorTeam1'])
-    {
-      setError1(result['errorTeam1']);
+    if(result.errorTeam1 || result.errorTeam2) {
+      setError1(result.errorTeam1 ?? null);
+      setError2(result.errorTeam2 ?? null);
+      return;
     }
-    if (result['errorTeam2'])
-    {
-      setError2(result['errorTeam2']);
+    if(!res.ok || result.error) {
+      setRequestError(result.error ?? 'An error occurred during the simulation. Please try again later.');
+      return;
     }
-    console.log(result)
     setResults(result);
-    setIsLoading(false);
-  }
-
-  if (error1 || error2) {
-    return (
-      <>
-      <div className = "flex justify-center">
-      <div className = "max-w-md bg-slate-100 border border-grey-300 rounded-xl shadow-md overflow-hidden p-4">
-        {error1 && (
-          <>
-          <p>
-            Team One: {error1}
-          </p>
-          </>
-        )}
-        {error2 && (
-          <p>
-            Team Two: {error2}
-          </p>
-        )}
-
-        <button
-        onClick = {() => {
-          setError1(null);
-          setError2(null);
-          setResults(null);
-        }}
-        >
-          Return
-        </button>
-        </div>
-        </div>
-      </>
-    )
+    }
+    catch (error) {
+      console.error('Error during simulation:', error);
+      setRequestError('An error occurred during the simulation. Please try again later.');
+    }
+    finally {
+      setIsLoading(false);
+    }
   }
 
   if (isLoading && battlers) {
@@ -138,6 +143,13 @@ function App() {
         <h1 className = "text-3xl font-bold">
           Pokemon Win Rate Calculator
         </h1>
+
+        {requestError && (
+          <div className = "bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role = "alert">
+            <strong className = "font-bold">Error! </strong>
+            <span className = "block sm:inline">{requestError}</span>
+          </div>
+        )}
 
         {/* Begin Battle Area */}
         <div className = "text-center grid grid-cols-3">
@@ -171,13 +183,15 @@ function App() {
 
           <div>  
             <button 
-            className = "px-5 py-2 rounded-full bg-white text-black font-bold border-4 border-black shadow-[2px_2px_0_#000] hover:translate-y-0.5 hover:shadow-[1px_1px_0_#000} active:translate-y-1 active:shadow-none transition m-4"
+            className = "px-5 py-2 rounded-full bg-white text-black font-bold border-4 border-black shadow-[2px_2px_0_#000] hover:translate-y-0.5 hover:shadow-[1px_1px_0_#000} active:translate-y-1 active:shadow-none transition m-4 disabled:opacity-50 disabled:cursor-not-allowed"
+            disabled = {!!error1 || !!error2}
             onClick = {handleSingles}
             >
               Begin Battle
             </button>
             <button 
             className = "px-5 py-2 rounded-full bg-white text-black font-bold border-4 border-black shadow-[2px_2px_0_#000] hover:translate-y-0.5 hover:shadow-[1px_1px_0_#000] active:translate-y-1 active:shadow-none transition m-4"
+            
             onClick = {() => {
               setTeam1(defaultTeam1);
               setTeam2(defaultTeam2);
@@ -199,6 +213,7 @@ function App() {
               onUpdate={(idx, patch) => updatePokemonInTeam(setTeam1, team1, idx, patch)}
               onRemove={(idx) => removePokemonFromTeam(setTeam1, team1, idx)}
               canAdd={canAddToTeam(team1)}
+              errors={error1}
             />
           </div>
           {/*Second section*/}
@@ -210,6 +225,7 @@ function App() {
               onUpdate={(idx, patch) => updatePokemonInTeam(setTeam2, team2, idx, patch)}
               onRemove={(idx) => removePokemonFromTeam(setTeam2, team2, idx)}
               canAdd={canAddToTeam(team2)}
+              errors={error2}
             />
           </div>
         </div>

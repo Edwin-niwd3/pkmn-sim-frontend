@@ -12,9 +12,10 @@ type TeamColumnProps = {
   onUpdate: (index: number, patch: Partial<Pokemon>) => boolean;
   onRemove: (index: number) => boolean;
   canAdd: boolean;
+  errors: string[] | null;
 };
 
-export function TeamColumn({ title, team, onAdd, onUpdate, onRemove, canAdd }: TeamColumnProps) {
+export function TeamColumn({ title, team, onAdd, onUpdate, onRemove, canAdd, errors }: TeamColumnProps) {
   
   const [focusedPokemonIndex, setFocusedPokemonIndex] = useState<number | null>(null);
   const [focusedPokemon, setFocusedPokemon] = useState<Pokemon | null> (null);
@@ -66,6 +67,13 @@ export function TeamColumn({ title, team, onAdd, onUpdate, onRemove, canAdd }: T
   return (
     <div ref = {topRef} className = "max-w-md bg-slate-100 border border-grey-300 rounded-xl shadow-md overflow-hidden p-4">
       {title}
+      {errors && (
+          <div>
+            <ul className = "text-red-700 text-sm text-left">
+              {errors.map((msg, i) => <li key = {i}>{msg}</li>)}
+            </ul>
+          </div>
+        )}
       {focusedPokemon === null ? (
       <>
       <ul className = "list-none block">

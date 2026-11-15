@@ -1,8 +1,5 @@
  export const formats = 
-  {  "Random Battle" :"gen9randombattle",
-    "Unrated Random Battle" : "gen9unratedrandombattle",
-    "Free-For_all random Battle": "gen9freeforallrandombattle",
-    "Random Battle (Blitz)": "gen9randombattleblitz",
+  {
     "OU" : "gen9ou",
     "Ubers" : "gen9ubers",
     "UU": "gen9uu",

@@ -50,7 +50,7 @@ Other scripts:
 3. Species names are validated and typed by fetching from PokeAPI. Sprites and Pokedex links come from external sources via `utils/Sprites.tsx`.
 4. Pressing **Begin Battle** sends both teams, the selected format, and the battle count to `POST /simulation/abtest` on the backend. The results page shows the win rates plus a card per Pokemon with its faint count, average lifespan in turns, and most-used move.
 5. **Load Test Teams** fills both columns with built-in VGC teams and selects a matching format.
-6. If the backend rejects a team, the validator messages for that team are shown with a button to go back and fix it.
+6. Each team is checked against the selected format by `POST /simulation/validate` whenever the team or the format changes. Any problems are listed in red at the top of that team's column, and **Begin Battle** is disabled until both teams are legal.
 
 The backend URL comes from the `VITE_API_URL` environment variable, which Vite reads at build time.
 
@@ -100,8 +100,6 @@ Species, item, ability, and move names use Showdown's display names, for example
 
 ## Known gaps
 
-- Random battle formats are listed but do not make sense with custom teams.
-- Validation errors from the backend are arrays but are rendered as a single string.
 - The EV sliders reject changes past the 510 total but do not visually stop there.
 - The favicon is still the Vite template default.
 
