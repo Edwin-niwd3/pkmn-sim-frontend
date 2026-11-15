@@ -121,6 +121,7 @@ function App() {
         }
         if (!res.ok || result.error) {
           setRequestError(result.error ?? 'An error occurred during the simulation. Please try again later.');
+          if (total) setResults(total);
           return;
         }
 
@@ -158,7 +159,7 @@ function App() {
           />
         </div>
         <button 
-            className = "px-5 py-2 rounded-full bg-white text-black font-bold border-4 border-black shadow-[2px_2px_0_#000] hover:translate-y-0.5 hover:shadow-[1px_1px_0_#000} active:translate-y-1 active:shadow-none transition m-4"
+            className = "px-5 py-2 rounded-full bg-white text-black font-bold border-4 border-black shadow-[2px_2px_0_#000] hover:translate-y-0.5 hover:shadow-[1px_1px_0_#000} active:translate-y-1 active:shadow-none transition m-4 disabled:opacity-50 disabled:cursor-not-allowed"
             onClick = {() => {cancelRef.current = true; setCancelling(true);}}
             disabled = {cancelling}
             >
