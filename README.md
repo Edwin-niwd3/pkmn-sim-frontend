@@ -101,11 +101,9 @@ Species, item, ability, and move names use Showdown's display names, for example
 
 ## Known gaps
 
-- The EV sliders reject changes past the 510 total but do not visually stop there.
 - The favicon is still the Vite template default.
 
 ## Roadmap
 
 1. Import teams from Showdown's text export format.
-2. Clamp the EV sliders at the 510 total.
-3. A calmer page background.
+2. A calmer page background.

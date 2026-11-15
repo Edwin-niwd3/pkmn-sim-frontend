@@ -15,11 +15,16 @@ type TeamColumnProps = {
   errors: string[] | null;
 };
 
+const MAX_TOTAL_EVS = 510;
+const MAX_STAT_EVS = 252;
+
 export function TeamColumn({ title, team, onAdd, onUpdate, onRemove, canAdd, errors }: TeamColumnProps) {
   
   const [focusedPokemonIndex, setFocusedPokemonIndex] = useState<number | null>(null);
   const [focusedPokemon, setFocusedPokemon] = useState<Pokemon | null> (null);
   const [addFlag, setAddFlag] = useState<boolean>(false);
+  const evsUsed = Object.values(focusedPokemon?.evs ?? {}).reduce((a,b) => a+b, 0);
+  const evsRemaining = MAX_TOTAL_EVS - evsUsed;
   
   const handleConfirm = async (updatePoke: Pokemon, PokeIndex: number) => {
     if (!updatePoke) return;
@@ -142,7 +147,7 @@ export function TeamColumn({ title, team, onAdd, onUpdate, onRemove, canAdd, err
                   <input
                     type="range"
                     min={0}
-                    max={252}
+                    max={MAX_STAT_EVS}
                     value={ev}
                     disabled
                     className="w-full h-2 bg-gray-200 appearance-none rounded overflow-hidden range-no-focus"
@@ -317,6 +322,9 @@ export function TeamColumn({ title, team, onAdd, onUpdate, onRemove, canAdd, err
           {/*Evs*/}
           <div className="mt-3">
             <p className="font-semibold mb-1 text-sm">Evs</p>
+            <p className = {evsRemaining < 4 ? 'text-red-600 font-semibold' : ''}>
+              EVs remaining: {evsRemaining} / {MAX_TOTAL_EVS}
+            </p>
             <div className="space-y-1 text-sm">
             {Object.entries(focusedPokemon.evs ?? {}).map(([stat, ev]) => (
               <div key={stat} className="mb-4">
@@ -327,28 +335,26 @@ export function TeamColumn({ title, team, onAdd, onUpdate, onRemove, canAdd, err
                   <input
                   type="range"
                   min={0}
-                  max={252}
+                  max={MAX_STAT_EVS}
                   step={4}
                   value={ev}
                   onChange={(e) => {
-                  const newVal = Number(e.target.value);
+                  const requested = Number(e.target.value);
 
                   setFocusedPokemon((prev): Pokemon | null => {
                     if (!prev) return prev;
 
                     const currentEvs = prev.evs ?? {};
-                    const currentTotal = Object.values(currentEvs).reduce((a, b) => a + b, 0);
                     const oldVal = currentEvs[stat] ?? 0;
-                    const totalAfterChange = currentTotal - oldVal + newVal;
+                    const othersTotal = Object.values(currentEvs).reduce((a,b) => a+b, 0) - oldVal;
                     
-                    if (totalAfterChange > 510) return prev;
+                    const room = Math.max(0, MAX_TOTAL_EVS - othersTotal);
+                    const maxForStat = Math.min(MAX_STAT_EVS, Math.floor(room/4) * 4);
+                    const newVal = Math.min(requested,maxForStat);
 
                     return {
                       ...prev,
-                      evs: {
-                        ...currentEvs,
-                        [stat]: newVal,
-                      },
+                      evs: {...currentEvs, [stat]:newVal},
                     };
                   });
                 }}
