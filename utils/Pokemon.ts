@@ -10,3 +10,11 @@ export type Pokemon = {
   ivs?: Record<string, number>;
   moves: string[];
 };
+
+export type monStats = {
+  appearances: number;
+  faints: number;
+  moves: Record<string, number>;
+  averageLifespan: number;
+  mostUsedMove: string | null;
+}

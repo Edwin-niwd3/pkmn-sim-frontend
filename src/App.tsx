@@ -2,21 +2,25 @@ import { useState } from 'react'
 import { useLocalStorageState } from './hooks/useLocalStorageState';
 import './App.css'
 import {formats} from '../utils/Formats'
+import {defaultTeam1, defaultTeam2, DEFAULT_FORMAT} from '../utils/DefaultTeams'
 import {type Pokemon} from '../utils/Pokemon'
 import { TeamColumn } from './TeamColumnComponent';
-import {Bouncy} from 'ldrs/react';
 import 'ldrs/react/Bouncy.css'
+import { PokemonSprite } from '../utils/Sprites';
+import { ResultsPage } from './ResultsPage';
+
 
 function App() {
 
 
   // team expand/collapse state removed in favor of TeamColumn component
-  const [team1, setTeam1] = useLocalStorageState<Pokemon[]>("team1", []);
-  const [team2, setTeam2] = useLocalStorageState<Pokemon[]>("team2", []);
+  const [team1, setTeam1] = useLocalStorageState<Pokemon[]>("team1", defaultTeam1);
+  const [team2, setTeam2] = useLocalStorageState<Pokemon[]>("team2", defaultTeam2);
   const [error1, setError1] = useState<String | null>(null);
   const [error2, setError2] = useState<String | null>(null);
-  const [selectedFormat, setSelectedFormat] = useState<string>("gen9ou");
+  const [selectedFormat, setSelectedFormat] = useState<string>(DEFAULT_FORMAT);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [battlers, setBattlers] = useState<[Pokemon, Pokemon] | null>(null);
   const [results, setResults] = useState<Record<string, any> | null>(null);
   const [numAttempts, setNumAttempts] = useState<number>(100);
 
@@ -49,7 +53,9 @@ function App() {
 
   const handleSingles = async () => {
     setIsLoading(true);
-    const res = await fetch('http://localhost:3000/simulation/abtest', {
+    const pick = (t: Pokemon[]) => t[Math.floor(Math.random() * t.length)];
+    setBattlers([pick(team1), pick(team2)]);
+    const res = await fetch(`${import.meta.env.VITE_API_URL}/simulation/abtest`, {
       method: 'POST',
       headers: {
         'Content-type': 'application/json',
@@ -108,55 +114,22 @@ function App() {
     )
   }
 
-  if (isLoading) {
+  if (isLoading && battlers) {
+    const [mine,theirs] = battlers;
     return (
-      <>
-      <Bouncy
-      size = "45"
-      speed = "1.75"
-      color = "Blue"
-      />
-      </>
-    )
+      <div className = "flex flex-col items-center gap-6 py-16">
+        <div className = "relative w-96 h-48">
+          <div className = "absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-20 h-20 bg-yellow-300 opacity-0 animate-clash motion-reduce:animate-none" style = {{clipPath: 'polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%)'}}></div>
+          <PokemonSprite key = {theirs.species} species = {theirs.species} className = "absolute top-0 right-4 w-28 animate-lunge-left motion-reduce:animate-none"/>
+          <PokemonSprite key = {mine.species} species = {mine.species} back className = "absolute bottom-0 left-4 w-28 animate-lunge-right motion-reduce:animate-none"/>
+        </div>
+        <p className = "text-slate-600"> Simulating {numAttempts} battles...</p>
+      </div>
+    );
   }
 
   if(results) {
-    return(
-      <>
-        <div className = "flex justify-center">
-        <div className = "max-w-md bg-slate-100 border border-grey-300 rounded-xl shadow-md overflow-hidden p-4">
-          <p>{results.message}</p>
-          <p>Average Duration Per Battle: {results.averageDurationMs}ms</p>
-          
-          <p>Stats</p>
-          <p>Draws: {results.draws}</p>
-          <div className = "grid grid-cols-2">
-            <div>
-              <h1>
-                Team 1
-              </h1>
-              <p>Team 1 win rate: {results.winRates.player1}</p>
-              <p>Number of games won: {results.player1Wins}</p>
-            </div>
-            <div>
-              <h1>
-                Team 2
-              </h1>
-              <p>Team 2 win rate: {results.winRates.player2}</p>
-              <p>Number of games won: {results.player2Wins}</p>
-            </div>
-          </div>
-          <button
-          onClick = {() => {
-            setResults(null);
-          }}
-          >
-            Return
-          </button>
-          </div>
-          </div>
-        </>
-      )
+    return <ResultsPage results={results} onReturn={() => setResults(null)} />;
   }
 
   return (
@@ -193,7 +166,6 @@ function App() {
               <option key= "50" value="50">50</option>
               <option key = "100" value="100">100</option>
               <option key = "500" value="500">500</option>
-              <option key = "1000" value="1000">1000</option>
             </select>
           </div>
 
@@ -202,7 +174,17 @@ function App() {
             className = "px-5 py-2 rounded-full bg-white text-black font-bold border-4 border-black shadow-[2px_2px_0_#000] hover:translate-y-0.5 hover:shadow-[1px_1px_0_#000} active:translate-y-1 active:shadow-none transition m-4"
             onClick = {handleSingles}
             >
-              Begin Battle  
+              Begin Battle
+            </button>
+            <button 
+            className = "px-5 py-2 rounded-full bg-white text-black font-bold border-4 border-black shadow-[2px_2px_0_#000] hover:translate-y-0.5 hover:shadow-[1px_1px_0_#000] active:translate-y-1 active:shadow-none transition m-4"
+            onClick = {() => {
+              setTeam1(defaultTeam1);
+              setTeam2(defaultTeam2);
+              setSelectedFormat(DEFAULT_FORMAT);
+            }}
+            >
+              Load Test Teams
             </button>
           </div>
         </div>

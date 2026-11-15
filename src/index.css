@@ -1,5 +1,29 @@
 @import "tailwindcss";
 
+@theme {
+  --animate-lunge-right: lunge-right 1.4s ease-in-out infinite;
+  --animate-lunge-left: lunge-left 1.4s ease-in-out infinite;
+  --animate-clash: clash 1.4s ease-out infinite;
+  --animate-shake: shake 1.4s linear infinite;
+}
+
+@keyframes clash {
+  0%, 33%   { opacity: 0; transform: translate(-50%, -50%) scale(0.2) rotate(0deg); }
+  36%       { opacity: 1; transform: translate(-50%, -50%) scale(1.3) rotate(20deg); }
+  50%, 100% { opacity: 0; transform: translate(-50%, -50%) scale(1.6) rotate(45deg); }
+}
+
+@keyframes lunge-left {
+  0%, 100%    {transform: translate(0,0); }
+  30%         {transform: translate(-110px, -40px);}
+  40%         {transform: translate(-90px, 30px);}
+}
+@keyframes lunge-right {
+  0%, 100%    {transform: translate(0,0); }
+  30%         {transform: translate(110px, -40px);}
+  40%         {transform: translate(90px, -30px);}
+}
+
 :root {
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;

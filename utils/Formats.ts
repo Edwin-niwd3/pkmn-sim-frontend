@@ -12,6 +12,9 @@
     "LC": "gen9lc",
     "Monotype": "gen9monotype",
     "CAP": "gen9cap",
-    "BSS Reg J": "gen9bssregj",
     "Anything Goes": "gen9anythinggoes",
+    "VGC 2025 Reg I": "gen9vgc2025regi",
+    "VGC 2024 Reg G": "gen9vgc2024regg",
+    "Doubles OU": "gen9doublesou",
+    "Doubles Ubers": "gen9doublesubers",
   };

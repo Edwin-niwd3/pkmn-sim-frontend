@@ -1,6 +1,6 @@
 // Put this component in the same file below App or in a new TeamColumn.tsx and import it.
 import { useState, useRef, useEffect } from 'react';
-import { getSpriteUrl } from '../utils/Sprites';
+import { PokemonSprite } from '../utils/Sprites';
 import { getTypesForSpecies, validateSpecies } from '../utils/PokemonInfo';
 import { typeColors } from '../utils/TypeColors';
 import {type Pokemon} from '../utils/Pokemon';
@@ -31,7 +31,7 @@ export function TeamColumn({ title, team, onAdd, onUpdate, onRemove, canAdd }: T
     }
     // Call the onUpdate prop
     if (addFlag) {
-      const success = onAdd(updatePoke);
+      onAdd(updatePoke);
       setAddFlag(false);
     }
     else {onUpdate(PokeIndex!, updatePoke!);}
@@ -87,8 +87,7 @@ export function TeamColumn({ title, team, onAdd, onUpdate, onRemove, canAdd }: T
           </div>
           {/* Pokemon Sprite and info */}
           <div className = "flex items-center gap-4">
-            <img src={getSpriteUrl(poke.species)}
-            alt = {poke.species} className = 'w-16 h-16'/>
+            <PokemonSprite key = {poke.species} species = {poke.species} className = "w-16 h-16" />
             <div className = "flex-1 grid grid-cols-2 gap-2 text-sm">
               <div>
                 <p><span className = "font-semibold">Type:</span></p>
@@ -190,8 +189,7 @@ export function TeamColumn({ title, team, onAdd, onUpdate, onRemove, canAdd }: T
           </div>
           {/* Pokemon Sprite and info */}
           <div className = "flex items-center gap-4">
-            <img src={getSpriteUrl(focusedPokemon.species)}
-            alt = {focusedPokemon.species} className = 'w-16 h-16'/>
+            <PokemonSprite key = {focusedPokemon.species} species = {focusedPokemon.species} className = "w-16 h-16" />
             <div className = "flex-1 grid grid-cols-2 gap-2 text-sm">
               <div>
                 <p><span className = "font-semibold">Type:</span></p>
