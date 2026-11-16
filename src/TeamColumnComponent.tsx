@@ -4,6 +4,7 @@ import { PokemonSprite } from '../utils/Sprites';
 import { getTypesForSpecies, validateSpecies } from '../utils/PokemonInfo';
 import { typeColors } from '../utils/TypeColors';
 import {type Pokemon} from '../utils/Pokemon';
+import { importTeam } from '../utils/importTeam';
 
 type TeamColumnProps = {
   title: string;
@@ -12,14 +13,19 @@ type TeamColumnProps = {
   onUpdate: (index: number, patch: Partial<Pokemon>) => boolean;
   onRemove: (index: number) => boolean;
   canAdd: boolean;
-  errors: string[] | null;
+  monErrors: string[][];
+  onImport: (team: Pokemon[]) => void;
 };
 
 const MAX_TOTAL_EVS = 510;
 const MAX_STAT_EVS = 252;
 
-export function TeamColumn({ title, team, onAdd, onUpdate, onRemove, canAdd, errors }: TeamColumnProps) {
+export function TeamColumn({ title, team, onAdd, onUpdate, onRemove, canAdd, monErrors, onImport}: TeamColumnProps) {
   
+  const [showImport, setShowImport] = useState<boolean>(false);
+  const [importText, setImportText] = useState<string>('');
+  const [importError, setImportError] = useState<string | null>(null);
+  const [importing, setImporting] = useState<boolean>(false);
   const [focusedPokemonIndex, setFocusedPokemonIndex] = useState<number | null>(null);
   const [focusedPokemon, setFocusedPokemon] = useState<Pokemon | null> (null);
   const [addFlag, setAddFlag] = useState<boolean>(false);
@@ -60,6 +66,21 @@ export function TeamColumn({ title, team, onAdd, onUpdate, onRemove, canAdd, err
     setAddFlag(true);
   }
 
+  const handleImport = async () => {
+    setImporting(true);
+    setImportError(null);
+    try {
+      const imported = await importTeam(importText);
+      onImport(imported);
+      setShowImport(false);
+      setImportText('');
+    } catch(e) {
+      setImportError(e instanceof Error ?e.message: 'Import failed');
+    } finally {
+      setImporting(false);
+    }
+  }
+
   const topRef = useRef<HTMLDivElement | null> (null);
 
   useEffect(() => {
@@ -70,15 +91,8 @@ export function TeamColumn({ title, team, onAdd, onUpdate, onRemove, canAdd, err
 
   // Render fixed 6 slots (0..5). If team has fewer than 6, show "Empty slot" UI.
   return (
-    <div ref = {topRef} className = "max-w-md bg-slate-100 border border-grey-300 rounded-xl shadow-md overflow-hidden p-4">
+    <div ref = {topRef} className = "w-md bg-slate-100 border border-grey-300 rounded-xl shadow-md overflow-hidden p-4">
       {title}
-      {errors && (
-          <div>
-            <ul className = "text-red-700 text-sm text-left">
-              {errors.map((msg, i) => <li key = {i}>{msg}</li>)}
-            </ul>
-          </div>
-        )}
       {focusedPokemon === null ? (
       <>
       <ul className = "list-none block">
@@ -98,6 +112,9 @@ export function TeamColumn({ title, team, onAdd, onUpdate, onRemove, canAdd, err
             readOnly
             />
           </div>
+          <ul className = "text-red-700 text-sm text-left mb-2">
+          {monErrors[idx]?.map((msg, i) => <li key = {i}>{msg}</li>)}
+          </ul>
           {/* Pokemon Sprite and info */}
           <div className = "flex items-center gap-4">
             <PokemonSprite key = {poke.species} species = {poke.species} className = "w-16 h-16" />
@@ -170,10 +187,28 @@ export function TeamColumn({ title, team, onAdd, onUpdate, onRemove, canAdd, err
 
         </>
       ))}
+      
       </ul>
       {team.length < 6 && canAdd && (
         <button onClick = {() => {handleCreate()}}>Add Pokemon</button>
       )}
+      {!showImport ? (
+        <button onClick = {() => setShowImport(true)}>Import from Showdown</button>) : (
+          <div className="mt-3 text-left">
+            <textarea value = {importText} onChange = {(e) => setImportText(e.target.value)}
+              placeholder = "Paste a showdown team here"
+              spellCheck = {false}
+              className = "w-full h-48 bg-white border border-gray-300 rounded p-2 text-sm font-mono"
+              />
+              {importError && <p className = "text-red-700 text-sm">{importError}</p>}
+              <button onClick = {handleImport} disabled = {importing || !importText.trim()}>
+                {importing? 'Importing...' : 'Replace team'}
+              </button>
+              <button onClick = {() => {setShowImport(false); setImportError(null);}}>
+                Cancel
+              </button>
+          </div>
+        )}
       </>
       ) 
       : 
@@ -200,6 +235,9 @@ export function TeamColumn({ title, team, onAdd, onUpdate, onRemove, canAdd, err
             }}
             />
           </div>
+          <ul className = "text-red-700 text-sm text-left mb-2">
+          {monErrors[focusedPokemonIndex!]?.map((msg, i) => <li key = {i}>{msg}</li>)}
+          </ul>
           {/* Pokemon Sprite and info */}
           <div className = "flex items-center gap-4">
             <PokemonSprite key = {focusedPokemon.species} species = {focusedPokemon.species} className = "w-16 h-16" />

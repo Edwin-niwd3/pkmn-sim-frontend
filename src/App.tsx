@@ -9,6 +9,7 @@ import { TeamColumn } from './TeamColumnComponent';
 import 'ldrs/react/Bouncy.css'
 import { PokemonSprite } from '../utils/Sprites';
 import { ResultsPage } from './ResultsPage';
+import { splitErrors } from '../utils/splitErrors'
 
 async function fetchTeamErrors(team: Pokemon[], format: string): Promise<string[] | null> {
     const res = await fetch(`${import.meta.env.VITE_API_URL}/simulation/validate`, {
@@ -21,6 +22,14 @@ async function fetchTeamErrors(team: Pokemon[], format: string): Promise<string[
 }
 
 const BATCH_SIZE = 25;
+
+function ErrorList({ errors, side } : { errors: string[] | null; side: 'left' | 'right'}) {
+  return (
+    <ul className = {`text-sm text-red-300 ${side === 'left' ? 'text-right' : 'text-left'}`}>
+      {errors?.map((msg, i) => <li key = {i}>{msg}</li>)}
+    </ul>
+  )
+}
 
 function App() {
 
@@ -159,7 +168,7 @@ function App() {
           />
         </div>
         <button 
-            className = "px-5 py-2 rounded-full bg-white text-black font-bold border-4 border-black shadow-[2px_2px_0_#000] hover:translate-y-0.5 hover:shadow-[1px_1px_0_#000} active:translate-y-1 active:shadow-none transition m-4 disabled:opacity-50 disabled:cursor-not-allowed"
+            className = "px-5 py-2 rounded-full bg-white text-black font-bold border-4 border-black shadow-pop hover:translate-y-0.5 hover:shadow-pop-sm active:translate-y-1 active:shadow-none transition m-4 disabled:opacity-50 disabled:cursor-not-allowed"
             onClick = {() => {cancelRef.current = true; setCancelling(true);}}
             disabled = {cancelling}
             >
@@ -172,6 +181,9 @@ function App() {
   if(results) {
     return <ResultsPage results={results} onReturn={() => setResults(null)} />;
   }
+
+  const split1 = splitErrors(error1, team1);
+  const split2 = splitErrors(error2, team2);
 
   return (
     <>
@@ -193,7 +205,7 @@ function App() {
             <select
             value = {selectedFormat}
             onChange={(e) => setSelectedFormat(e.target.value)}
-            className = "px-5 py-2 rounded-full bg-white text-black font-bold shadow-[2px_2px_0_#000] hover:translate-y-0.5 hover:shadow-[1px_1px_0_#000} active:translate-y-1 active:shadow-none transition m-4"
+            className = "px-5 py-2 rounded-full bg-white text-black font-bold shadow-pop hover:translate-y-0.5 hover:shadow-pop-sm active:translate-y-1 active:shadow-none transition m-4"
             >
             {Object.entries(formats ?? {}).map(([formatName, formatValue]) => (
               <option key = {formatValue} value= {formatValue}>
@@ -209,7 +221,7 @@ function App() {
             onChange= {(e) => {
               setNumAttempts(Number(e.target.value))
             }}
-            className = "px-5 py-2 rounded-full bg-white text-black font-bold shadow-[2px_2px_0_#000] hover:translate-y-0.5 hover:shadow-[1px_1px_0_#000] active:translate-y-1 active:shadow-none transition m-4"
+            className = "px-5 py-2 rounded-full bg-white text-black font-bold shadow-pop hover:translate-y-0.5 hover:shadow-pop-sm active:translate-y-1 active:shadow-none transition m-4"
             >
               <option key= "50" value="50">50</option>
               <option key = "100" value="100">100</option>
@@ -219,14 +231,14 @@ function App() {
 
           <div>  
             <button 
-            className = "px-5 py-2 rounded-full bg-white text-black font-bold border-4 border-black shadow-[2px_2px_0_#000] hover:translate-y-0.5 hover:shadow-[1px_1px_0_#000} active:translate-y-1 active:shadow-none transition m-4 disabled:opacity-50 disabled:cursor-not-allowed"
+            className = "px-5 py-2 rounded-full bg-white text-black font-bold border-4 border-black shadow-pop hover:translate-y-0.5 hover:shadow-pop-sm active:translate-y-1 active:shadow-none transition m-4 disabled:opacity-50 disabled:cursor-not-allowed"
             disabled = {!!error1 || !!error2}
             onClick = {handleBattles}
             >
               Begin Battle
             </button>
             <button 
-            className = "px-5 py-2 rounded-full bg-white text-black font-bold border-4 border-black shadow-[2px_2px_0_#000] hover:translate-y-0.5 hover:shadow-[1px_1px_0_#000] active:translate-y-1 active:shadow-none transition m-4"
+            className = "px-5 py-2 rounded-full bg-white text-black font-bold border-4 border-black shadow-pop hover:translate-y-0.5 hover:shadow-pop-sm active:translate-y-1 active:shadow-none transition m-4"
             
             onClick = {() => {
               setTeam1(defaultTeam1);
@@ -239,8 +251,9 @@ function App() {
           </div>
         </div>
 
-        <div className = "text-center grid grid-cols-2 gap-4">
+        <div className = "w-full grid grid-cols-[minmax(0,1fr)_auto_auto_minmax(0,1fr)] gap-4 items-start">
           {/*First section*/}
+          <ErrorList errors = {split1.general} side = "left"/>
           <div className = "bg-white/10 p-4 rounded-lg backdrop-blur-md border border-white/20">
             <TeamColumn
               title="Team One"
@@ -249,7 +262,8 @@ function App() {
               onUpdate={(idx, patch) => updatePokemonInTeam(setTeam1, team1, idx, patch)}
               onRemove={(idx) => removePokemonFromTeam(setTeam1, team1, idx)}
               canAdd={canAddToTeam(team1)}
-              errors={error1}
+              monErrors = {split1.perMon}
+              onImport = {setTeam1}
             />
           </div>
           {/*Second section*/}
@@ -261,9 +275,11 @@ function App() {
               onUpdate={(idx, patch) => updatePokemonInTeam(setTeam2, team2, idx, patch)}
               onRemove={(idx) => removePokemonFromTeam(setTeam2, team2, idx)}
               canAdd={canAddToTeam(team2)}
-              errors={error2}
+              monErrors = {split2.perMon}
+              onImport = {setTeam2}
             />
           </div>
+          <ErrorList errors = {split2.general} side = "right"/>
         </div>
       </div>
     </>

@@ -9,6 +9,8 @@ export type Pokemon = {
   evs?: Record<string, number>;
   ivs?: Record<string, number>;
   moves: string[];
+  level?: number;
+  teraType?: string;
 };
 
 export type monStats = {

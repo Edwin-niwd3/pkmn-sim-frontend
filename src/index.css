@@ -5,6 +5,8 @@
   --animate-lunge-left: lunge-left 1.4s ease-in-out infinite;
   --animate-clash: clash 1.4s ease-out infinite;
   --animate-shake: shake 1.4s linear infinite;
+  --shadow-pop: 3px 3px 0 #94a3b8;
+  --shadow-pop-sm: 1px 1px 0 #94a3b8;
 }
 
 @keyframes clash {
